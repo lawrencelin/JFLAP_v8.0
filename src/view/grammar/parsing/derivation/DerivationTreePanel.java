@@ -51,6 +51,8 @@ public class DerivationTreePanel extends DerivationPanel {
 	private Map<UnrestrictedTreeNode, Point2D> nodeToPoint;
 
 	private UnrestrictedTreeNode root;
+	private double xTopAdjustment;
+	private double yTopAdjustment;
 
 	private Derivation myAnswer;
 
@@ -587,5 +589,187 @@ public class DerivationTreePanel extends DerivationPanel {
 			return true; // Everything starts at beginning.
 		return ends(level - 1, group);
 	}
+	
+	private boolean positionTree(UnrestrictedTreeNode n) {
+		if (n!=null) {
+			initPrevNodeList();
+			firstWalk(n, 0);
+			xTopAdjustment = n.xCoord - n.prelimX; 
+			yTopAdjustment = n.yCoord; 
+			return secondWalk(n, 0 , 0);
+		} 
+		return true;
+	}
+	
+	private void initPrevNodeList() {
+		UnrestrictedTreeNode temp = root;
+		while (temp!=null) {
+			temp.prevNode = null;
+			temp = temp.nextLevel;
+		}
+	}
+
+	private UnrestrictedTreeNode getPrevNodeAtLevel(int level) {
+		UnrestrictedTreeNode temp = root;
+		int i = 0;
+		while (temp!=null) {
+			if (i == level) {
+				return temp.prevNode;
+			}
+			temp = temp.nextLevel;
+			i++;
+		}
+		return null;
+	}
+	
+	private void setPrevNodeAtLevel(int level, UnrestrictedTreeNode node) {
+		UnrestrictedTreeNode temp = root;
+		int i = 0;
+		while (temp!=null) {
+			if (i == level) {
+				temp.prevNode = node;
+				return;
+			} else if (temp.nextLevel == null) {
+				UnrestrictedTreeNode newNode = new UnrestrictedTreeNode();
+				newNode.prevNode = null;
+				newNode.nextLevel = null;
+				temp.nextLevel = newNode;
+			}
+			temp = temp.nextLevel;
+			i++;
+		}
+		// only get here if root is null
+		root = new UnrestrictedTreeNode();
+		root.prevNode = node;
+		root.nextLevel = null;
+	}
+	private void firstWalk(UnrestrictedTreeNode node, int level) {
+		node.leftNeighbor = getPrevNodeAtLevel(level);
+		setPrevNodeAtLevel(level, node);
+		node.modifier = 0;
+		if (node.isLeaf() || level == MAX_DEPTH) {
+			if (node.getPreviousSibling() != null) {
+				node.prelimX = ((UnrestrictedTreeNode) node.getPreviousSibling()).prelimX +
+						SIBLING_SEPARATION + DefaultNodeDrawer.NODE_RADIUS;
+			} else {
+				node.prelimX = 0;
+			}
+		} else {
+			UnrestrictedTreeNode leftMost = (UnrestrictedTreeNode) node.getFirstChild();
+			UnrestrictedTreeNode rightMost = leftMost;
+			firstWalk(leftMost, level+1);
+			while (rightMost.getNextSibling() != null) {
+				rightMost = (UnrestrictedTreeNode) rightMost.getNextSibling();
+				firstWalk(rightMost, level+1);
+			}
+			double midPoint = (leftMost.prelimX + rightMost.prelimX) /2;
+			if (node.getPreviousSibling() != null) {
+				node.prelimX = ((UnrestrictedTreeNode) node.getPreviousSibling()).prelimX +
+						SIBLING_SEPARATION + DefaultNodeDrawer.NODE_RADIUS;
+				node.modifier = node.prelimX - midPoint;
+				apportion(node, level);
+			} else {
+				node.prelimX = midPoint;
+			}
+		}
+	}
+	
+	private boolean secondWalk(UnrestrictedTreeNode node, int level, double modSum) {
+		boolean result = true;
+		if (level <= MAX_DEPTH) {
+			double xTemp = xTopAdjustment + node.prelimX + modSum;
+			double yTemp = yTopAdjustment + (level * LEVEL_SEPARATION);
+			if (checkValidPosition(xTemp, yTemp)) {
+				node.xCoord = xTemp;
+				node.yCoord = yTemp;
+				if (!node.isLeaf()) {
+					result = secondWalk((UnrestrictedTreeNode)node.getFirstChild(), 
+							level+1, 
+							modSum+node.modifier);
+				}
+				if (result == true && node.getNextSibling()!=null) {
+					result = secondWalk((UnrestrictedTreeNode)node.getNextSibling(), level+1, modSum);
+				}
+			} else {
+				result = false;
+			}
+		}
+		return result;
+	}
+	
+	private void apportion(UnrestrictedTreeNode node, int level) {
+		UnrestrictedTreeNode leftMost = (UnrestrictedTreeNode) node.getFirstChild();
+		UnrestrictedTreeNode neighbor = leftMost.leftNeighbor;
+		int compareDepth = 1;
+		int depthToStop = MAX_DEPTH - level;
+		while (leftMost != null && 
+				neighbor != null && 
+				compareDepth <= depthToStop) {
+			double leftModSum = 0;
+			double rightModSum = 0;
+			UnrestrictedTreeNode ancestorLeftMost = leftMost;
+			UnrestrictedTreeNode ancestorNeighbor = neighbor;
+			for (int i = 0; i < compareDepth; i++) {
+				ancestorLeftMost = (UnrestrictedTreeNode) ancestorLeftMost.getParent();
+				ancestorNeighbor = (UnrestrictedTreeNode) ancestorNeighbor.getParent();
+				rightModSum += ancestorLeftMost.modifier;
+				leftModSum += ancestorNeighbor.modifier;
+			}
+			
+			double moveDistance = (neighbor.prelimX + leftModSum + SUBTREE_SEPARATION +
+					DefaultNodeDrawer.NODE_RADIUS) - (leftMost.prelimX + rightModSum);
+			
+			if (moveDistance > 0) {
+				UnrestrictedTreeNode temp = node;
+				int leftSiblings = 0;
+				while (temp != null && !temp.equals(ancestorNeighbor)) {
+					leftSiblings++;
+					temp = (UnrestrictedTreeNode) temp.getPreviousSibling();
+				}
+				if (temp != null) {
+					double portion = moveDistance / leftSiblings;
+					temp = node;
+					while (temp.equals(ancestorNeighbor)) {
+						temp.prelimX+=moveDistance;
+						temp.modifier+=moveDistance;
+						moveDistance-=portion;
+						temp = (UnrestrictedTreeNode) temp.getPreviousSibling();
+					}
+				} else {
+					return;
+				}
+			}
+			
+			compareDepth++;
+			if (leftMost.isLeaf()) {
+				leftMost = getLeftMost(node, 0 ,compareDepth);
+			} else {
+				leftMost = (UnrestrictedTreeNode) leftMost.getFirstChild();
+			}
+		}
+	}
+	
+	private boolean checkValidPosition(double x, double y) {
+		return (x>=0 && 
+				x<=this.realWidth && 
+				y>=0 && y<=this.realHeight);
+	}
+	
+	private UnrestrictedTreeNode getLeftMost(UnrestrictedTreeNode node, int level, int depth) {
+		if (level>=depth) return node;
+		if (node.isLeaf()) return null;
+		UnrestrictedTreeNode rightMost = (UnrestrictedTreeNode) node.getFirstChild();
+		UnrestrictedTreeNode leftMost = getLeftMost(rightMost, level+1, depth);
+		while (leftMost == null && rightMost.getNextSibling() != null) {
+			rightMost = (UnrestrictedTreeNode) rightMost.getNextSibling();
+			leftMost = getLeftMost(rightMost, level+1, depth);
+		}
+		return leftMost;
+	}
+	
+	private static final double LEVEL_SEPARATION = 5;
+	private static final int MAX_DEPTH = 5;
+	private static final double SIBLING_SEPARATION = 5;
+	private static final double SUBTREE_SEPARATION = 5;
 
 }

@@ -62,6 +62,10 @@ public class UnrestrictedTreeNode extends DefaultMutableTreeNode {
 	 */
 	public double modifier = 0;
 	
+	public UnrestrictedTreeNode prevNode;
+	public UnrestrictedTreeNode nextLevel;
+	public UnrestrictedTreeNode leftNeighbor;
+	
 	/**
 	 * Creates a new unrestricted tree node.
 	 * 
