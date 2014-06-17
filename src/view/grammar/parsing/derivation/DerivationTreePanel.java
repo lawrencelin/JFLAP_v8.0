@@ -72,8 +72,45 @@ public class DerivationTreePanel extends DerivationPanel {
 	public DerivationTreePanel(Derivation d, boolean inverted) {
 		this(new DefaultTreeModel(new DefaultMutableTreeNode()), inverted);
 		myAnswer = d;
+		initTree();
 		setAnswer(d);
 		called = false;
+	}
+
+	/**
+	 * Parse the derivation to initialize tree structure
+	 */
+	private void initTree() {
+		List<UnrestrictedTreeNode> curNodes = new ArrayList<UnrestrictedTreeNode>();
+		List<UnrestrictedTreeNode> childrenList = new ArrayList<UnrestrictedTreeNode>();
+		List<UnrestrictedTreeNode> temp = new ArrayList<UnrestrictedTreeNode>();
+		for (int i = 0; i < myAnswer.getProductionArray().length; i++) {
+			Production currentProd = myAnswer.getProduction(i);
+			int index = myAnswer.getSubstitution(i);
+			// since it is restricted grammar, lhs should only have one symbol. right?
+			Symbol lhs = currentProd.getLHS()[0];
+			Symbol[] rhs = currentProd.getRHS();
+			if (curNodes.isEmpty()) {
+				root = new UnrestrictedTreeNode(lhs);
+				curNodes.add(root);
+			} 
+			UnrestrictedTreeNode parent = curNodes.get(index);
+			for (Symbol s : rhs) {
+				UnrestrictedTreeNode node = new UnrestrictedTreeNode(s);
+				parent.add(node);
+				childrenList.add(node);
+			}
+			for (int j = 0; j < index; j++) {
+				temp.add(curNodes.get(j));
+			}
+			// update current list of nodes
+			temp.addAll(childrenList);
+			temp.addAll(curNodes.subList(index+1, curNodes.size()));
+			curNodes.clear();
+			curNodes.addAll(temp);
+			childrenList.clear();
+			temp.clear();
+		}
 	}
 
 	/* (non-Javadoc)
@@ -550,5 +587,5 @@ public class DerivationTreePanel extends DerivationPanel {
 			return true; // Everything starts at beginning.
 		return ends(level - 1, group);
 	}
-	
+
 }
