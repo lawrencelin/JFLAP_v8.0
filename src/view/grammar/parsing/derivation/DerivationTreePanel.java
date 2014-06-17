@@ -49,10 +49,6 @@ public class DerivationTreePanel extends DerivationPanel {
 	private Map<UnrestrictedTreeNode, List<UnrestrictedTreeNode>> nodeToParentGroup;
 	private Map<UnrestrictedTreeNode, Double> nodeToParentWeights;
 	private Map<UnrestrictedTreeNode, Point2D> nodeToPoint;
-	private Map<UnrestrictedTreeNode, Integer> nodeToLevel; // map a node to its level. top is 0. 
-	private Map<UnrestrictedTreeNode, List<UnrestrictedTreeNode>> parentToChildren; // map a node to its immediate children
-	private Map<UnrestrictedTreeNode, Integer> leafChildrenCount;
-	private Map<UnrestrictedTreeNode, Integer> graphPortion;
 
 	private UnrestrictedTreeNode root;
 
@@ -66,11 +62,6 @@ public class DerivationTreePanel extends DerivationPanel {
 		nodeDrawer = new DefaultNodeDrawer();
 		nodeToParentGroup = new HashMap<UnrestrictedTreeNode, List<UnrestrictedTreeNode>>();
 		nodeToParentWeights = new HashMap<UnrestrictedTreeNode, Double>();
-		// new stuff: four maps
-		nodeToLevel = new HashMap<UnrestrictedTreeNode, Integer>(); 
-		parentToChildren = new HashMap<UnrestrictedTreeNode, List<UnrestrictedTreeNode>>(); 
-		leafChildrenCount = new HashMap<UnrestrictedTreeNode, Integer>();
-		graphPortion = new HashMap<UnrestrictedTreeNode, Integer>();
 		amInverted = inverted;
 	}
 
@@ -81,70 +72,8 @@ public class DerivationTreePanel extends DerivationPanel {
 	public DerivationTreePanel(Derivation d, boolean inverted) {
 		this(new DefaultTreeModel(new DefaultMutableTreeNode()), inverted);
 		myAnswer = d;
-		assignLevelToNodesAndInitParentChildrenMap();
-		//		assignHorizontalSpace();
-		//		System.out.println(getHorizontalSpan(parentToChildren.get(root).get(0)));
 		setAnswer(d);
 		called = false;
-	}
-
-	private void assignHorizontalSpace(UnrestrictedTreeNode n) {
-
-
-	}
-
-	private void assignLevelToNodesAndInitParentChildrenMap() {
-		List<UnrestrictedTreeNode> cur = new ArrayList<UnrestrictedTreeNode>();
-		Production[] p = myAnswer.getProductionArray();
-		Integer[] sub = myAnswer.getSubstitutionArray();
-		for (int i = 0; i < p.length; i++) {
-			Production curProd = p[i];
-			int index = sub[i];
-			// since it is restricted grammar, lhs should only have one symbol. right?
-			Symbol lhs = curProd.getLHS()[0];
-			Symbol[] rhs = curProd.getRHS();
-			if (nodeToLevel.isEmpty()) {
-				UnrestrictedTreeNode n = new UnrestrictedTreeNode(lhs);
-				root = n;
-				cur.add(n);
-				nodeToLevel.put(n, 0);
-			} 
-			List<UnrestrictedTreeNode> childrenList = new ArrayList<UnrestrictedTreeNode>();
-			for (Symbol s : rhs) {
-				UnrestrictedTreeNode node = new UnrestrictedTreeNode(s);
-				nodeToLevel.put(node, nodeToLevel.get(cur.get(index))+1);
-				childrenList.add(node);
-			}
-			parentToChildren.put(cur.get(index),childrenList);
-			List<UnrestrictedTreeNode> temp = new ArrayList<UnrestrictedTreeNode>();
-			for (int j = 0; j < index; j++) {
-				temp.add(cur.get(j));
-			}
-			// update current list of nodes
-			temp.addAll(childrenList);
-			temp.addAll(cur.subList(index+1, cur.size()));
-			cur = temp;
-		}
-	}
-
-	/**
-	 * Get the number of leaf children of a certain node.
-	 * Use memoization to optimize runtime. 
-	 * @param node
-	 */
-	private int getHorizontalSpan(UnrestrictedTreeNode node) {
-		if (!parentToChildren.containsKey(node)) {
-			return 1;
-		}
-		if (leafChildrenCount.containsKey(node)) {
-			return leafChildrenCount.get(node);
-		}
-		int children = 0;
-		for (UnrestrictedTreeNode n : parentToChildren.get(node)) {
-			children+=getHorizontalSpan(n);
-		}
-		leafChildrenCount.put(node, children);
-		return children;
 	}
 
 	/* (non-Javadoc)
@@ -173,21 +102,7 @@ public class DerivationTreePanel extends DerivationPanel {
 		g.setColor(Color.black);
 		if (top != null)
 			paintTree(g);
-//			newPaintTree(g);
 		g.dispose();
-	}
-	
-	private void newPaintTree(Graphics2D g) {
-		Dimension d = getSize();
-		realWidth = d.width;
-		realHeight = d.height;
-		if (metaWidth == -1.0)
-			setMetaWidth();
-		metaHeight = top.length;
-		Point2D p = new Point2D.Double();
-		nodeToPoint = new HashMap<UnrestrictedTreeNode, Point2D>();
-		g.drawLine((int)realWidth/2, (int)realHeight/2, (int)realWidth, (int)realHeight);
-		
 	}
 
 	public TreeNode nodeAtPoint(Point2D point) {
@@ -636,72 +551,4 @@ public class DerivationTreePanel extends DerivationPanel {
 		return ends(level - 1, group);
 	}
 	
-	class TreeLayoutHelper {
-		
-		private double xTopAdjustment;
-		private double yTopAdjustment;
-		
-		private static double LEVEL_SEPARATION = 10, SIBLING_SEPARATION = 10, SUBTREE_SEPARATION = 15;
-		private static int MAX_DEPTH = Integer.MAX_VALUE;
-		
-		
-		public boolean positionTree(UnrestrictedTreeNode n) {
-			if (n!=null) {
-				initPrevNodeList();
-				firstWalk(n, 0);
-				xTopAdjustment = xCoord(n) - prelim(n); 
-				yTopAdjustment = yCoord(n); 
-				return secondWalk(n, 0 , 0);
-			} return true;
-		}
-		
-		private void initPrevNodeList() {
-			UnrestrictedTreeNode temp = root;
-			while (temp!=null) {
-				
-			}
-			
-		}
-
-		private void firstWalk(UnrestrictedTreeNode n, int level) {
-			
-		}
-		
-		private UnrestrictedTreeNode parent(UnrestrictedTreeNode n) {
-			// implement this method!!
-			return n;
-		}
-		
-		private UnrestrictedTreeNode firstChild(UnrestrictedTreeNode n) {
-			if ()
-		}
-		
-		private UnrestrictedTreeNode leftSibling(UnrestrictedTreeNode n) {
-			
-		}
-		
-		private UnrestrictedTreeNode rightSibling(UnrestrictedTreeNode n) {
-			
-		}
-		
-		private double xCoord(UnrestrictedTreeNode n) {
-			
-		}
-		
-		private double yCoord(UnrestrictedTreeNode n) {
-			
-		}
-		
-		private double prelim(UnrestrictedTreeNode n) {
-			
-		}
-		
-		private double modifier(UnrestrictedTreeNode n) {
-			
-		}
-		
-		private UnrestrictedTreeNode leftNeighbor(UnrestrictedTreeNode n) {
-			
-		}
-
 }

@@ -20,6 +20,9 @@ package oldnewstuff.view.tree;
 
 
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import universe.preferences.JFLAPPreferences;
@@ -27,6 +30,18 @@ import model.symbols.Symbol;
 import model.symbols.SymbolString;
 
 public class UnrestrictedTreeNode extends DefaultMutableTreeNode {
+	/** The text! */
+	private SymbolString text;
+
+	/** The weight. */
+	public double weight = 1.0;
+
+	/** The highest row. */
+	public int highest = 0;
+
+	/** The lowest row. */
+	public int lowest = 0;
+	
 	/**
 	 * Creates a new unrestricted tree node.
 	 * 
@@ -36,6 +51,7 @@ public class UnrestrictedTreeNode extends DefaultMutableTreeNode {
 	public UnrestrictedTreeNode(SymbolString text) {
 		super(text);
 		this.text = text;
+		parent = null;
 	}
 	
 	public UnrestrictedTreeNode(Symbol s) {
@@ -72,15 +88,4 @@ public class UnrestrictedTreeNode extends DefaultMutableTreeNode {
 		// return "("+text+", "+weight+")";
 	}
 
-	/** The text! */
-	private SymbolString text;
-
-	/** The weight. */
-	public double weight = 1.0;
-
-	/** The highest row. */
-	public int highest = 0;
-
-	/** The lowest row. */
-	public int lowest = 0;
 }
