@@ -38,6 +38,15 @@ public class DerivationTreePanel extends DerivationPanel {
 			LEAF = new Color(255, 255, 100),
 			BRACKET = new Color(150, 150, 255), // purple
 			BRACKET_OUT = BRACKET.darker().darker();
+	// Minimum distance between levels of nodes
+	private static final double LEVEL_SEPARATION = 50;
+	private static final int MAX_DEPTH = Integer.MAX_VALUE;
+	// Minimum separation desitance between sibling nodes
+	private static final double SIBLING_SEPARATION = 100;
+	// Minimum separation desitance between subtrees
+	private static final double SUBTREE_SEPARATION = 200;
+	// Size of the nodes
+	private static final double MEAN_NODE_SIZE = DefaultNodeDrawer.NODE_RADIUS;
 
 	private boolean amInverted;
 	private TreeDrawer treeDrawer;
@@ -618,9 +627,9 @@ public class DerivationTreePanel extends DerivationPanel {
 		if (n!=null) {
 			initPrevNodeList();
 			firstWalk(n, 0);
-//			xTopAdjustment = n.xCoord - n.prelimX; 
+			xTopAdjustment = n.xCoord - n.prelimX; 
 			yTopAdjustment = n.yCoord; 
-			xTopAdjustment = 0;
+//			xTopAdjustment = 0;
 //			yTopAdjustment = 0;
 			return secondWalk(n, 0 , 0);
 		} 
@@ -871,12 +880,4 @@ public class DerivationTreePanel extends DerivationPanel {
 		root.yCoord = 200;
 		return root;
 	}
-	
-	private static final double LEVEL_SEPARATION = 50;
-	private static final int MAX_DEPTH = Integer.MAX_VALUE;
-	private static final double SIBLING_SEPARATION = 50;
-	private static final double SUBTREE_SEPARATION = 50;
-//	private static final double MEAN_NODE_SIZE = DefaultNodeDrawer.NODE_RADIUS;
-
-	private static final double MEAN_NODE_SIZE = 30;
 }
