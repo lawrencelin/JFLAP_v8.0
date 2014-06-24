@@ -8,7 +8,9 @@ import java.awt.RenderingHints;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +55,7 @@ public class DerivationTreePanel extends DerivationPanel {
 	private UnrestrictedTreeNode root;
 	private double xTopAdjustment;
 	private double yTopAdjustment;
+	private List<UnrestrictedTreeNode> prevList;
 
 	private Derivation myAnswer;
 
@@ -74,9 +77,13 @@ public class DerivationTreePanel extends DerivationPanel {
 	public DerivationTreePanel(Derivation d, boolean inverted) {
 		this(new DefaultTreeModel(new DefaultMutableTreeNode()), inverted);
 		myAnswer = d;
-		initTree();
+//		initTree();
+		root = buildTestTree();
 		setAnswer(d);
 		called = false;
+//		realWidth = getSize().width;
+//		realHeight = getSize().height;
+//		positionTree(root);
 	}
 
 	/**
@@ -113,6 +120,10 @@ public class DerivationTreePanel extends DerivationPanel {
 			childrenList.clear();
 			temp.clear();
 		}
+		
+		// pre-set coordinates of the root: top center
+		root.xCoord = realWidth / 2;
+		root.yCoord = 100;
 	}
 
 	/* (non-Javadoc)
@@ -139,8 +150,13 @@ public class DerivationTreePanel extends DerivationPanel {
 		Dimension d = getSize();
 		g.fillRect(0, 0, d.width, d.height);
 		g.setColor(Color.black);
-		if (top != null)
-			paintTree(g);
+		if (top != null) {
+//			paintTree(g);
+			realWidth = d.width;
+			realHeight = d.height;
+			positionTree(root);
+			paintTest(g, root, new Point2D.Double(root.xCoord, root.yCoord));
+		}
 		g.dispose();
 	}
 
@@ -594,55 +610,74 @@ public class DerivationTreePanel extends DerivationPanel {
 		if (n!=null) {
 			initPrevNodeList();
 			firstWalk(n, 0);
-			xTopAdjustment = n.xCoord - n.prelimX; 
+//			xTopAdjustment = n.xCoord - n.prelimX; 
 			yTopAdjustment = n.yCoord; 
+			xTopAdjustment = 0;
+//			yTopAdjustment = 0;
 			return secondWalk(n, 0 , 0);
 		} 
 		return true;
 	}
 	
 	private void initPrevNodeList() {
-		UnrestrictedTreeNode temp = root;
-		while (temp!=null) {
-			temp.prevNode = null;
-			temp = temp.nextLevel;
-		}
+//		UnrestrictedTreeNode temp = root;		
+//		while (temp!=null) {
+//			temp.prevNode = null;
+//			temp = temp.nextLevel;
+//		}
+		prevList = new LinkedList<UnrestrictedTreeNode>();
 	}
-
+	
 	private UnrestrictedTreeNode getPrevNodeAtLevel(int level) {
-		UnrestrictedTreeNode temp = root;
-		int i = 0;
-		while (temp!=null) {
-			if (i == level) {
-				return temp.prevNode;
-			}
-			temp = temp.nextLevel;
-			i++;
+		if (level > prevList.size()-1) {
+			return null;
 		}
-		return null;
+		return prevList.get(level);
 	}
 	
 	private void setPrevNodeAtLevel(int level, UnrestrictedTreeNode node) {
-		UnrestrictedTreeNode temp = root;
-		int i = 0;
-		while (temp!=null) {
-			if (i == level) {
-				temp.prevNode = node;
-				return;
-			} else if (temp.nextLevel == null) {
-				UnrestrictedTreeNode newNode = new UnrestrictedTreeNode();
-				newNode.prevNode = null;
-				newNode.nextLevel = null;
-				temp.nextLevel = newNode;
-			}
-			temp = temp.nextLevel;
-			i++;
+		if (level > prevList.size()-1) {
+			prevList.add(node);
+			return;
 		}
-		// only get here if root is null
-		root = new UnrestrictedTreeNode();
-		root.prevNode = node;
-		root.nextLevel = null;
+		prevList.set(level, node);
 	}
+
+//	private UnrestrictedTreeNode getPrevNodeAtLevel(int level) {
+//		UnrestrictedTreeNode temp = root;
+//		int i = 0;
+//		while (temp!=null) {
+//			if (i == level) {
+//				return temp.prevNode;
+//			}
+//			temp = temp.nextLevel;
+//			i++;
+//		}
+//		return null;
+//	}
+//	
+//	private void setPrevNodeAtLevel(int level, UnrestrictedTreeNode node) {
+//		UnrestrictedTreeNode temp = root;
+//		int i = 0;
+//		while (temp!=null) {
+//			if (i == level) {
+//				temp.prevNode = node;
+//				return;
+//			} else if (temp.nextLevel == null) {
+//				UnrestrictedTreeNode newNode = new UnrestrictedTreeNode();
+//				newNode.prevNode = null;
+//				newNode.nextLevel = null;
+//				temp.nextLevel = newNode;
+//			}
+//			temp = temp.nextLevel;
+//			i++;
+//		}
+//		// only get here if root is null
+//		root = new UnrestrictedTreeNode();
+//		root.prevNode = node;
+//		root.nextLevel = null;
+//	}
+	
 	private void firstWalk(UnrestrictedTreeNode node, int level) {
 		node.leftNeighbor = getPrevNodeAtLevel(level);
 		setPrevNodeAtLevel(level, node);
@@ -650,7 +685,7 @@ public class DerivationTreePanel extends DerivationPanel {
 		if (node.isLeaf() || level == MAX_DEPTH) {
 			if (node.getPreviousSibling() != null) {
 				node.prelimX = ((UnrestrictedTreeNode) node.getPreviousSibling()).prelimX +
-						SIBLING_SEPARATION + DefaultNodeDrawer.NODE_RADIUS;
+						SIBLING_SEPARATION + MEAN_NODE_SIZE;
 			} else {
 				node.prelimX = 0;
 			}
@@ -665,7 +700,7 @@ public class DerivationTreePanel extends DerivationPanel {
 			double midPoint = (leftMost.prelimX + rightMost.prelimX) /2;
 			if (node.getPreviousSibling() != null) {
 				node.prelimX = ((UnrestrictedTreeNode) node.getPreviousSibling()).prelimX +
-						SIBLING_SEPARATION + DefaultNodeDrawer.NODE_RADIUS;
+						SIBLING_SEPARATION + MEAN_NODE_SIZE;
 				node.modifier = node.prelimX - midPoint;
 				apportion(node, level);
 			} else {
@@ -688,7 +723,7 @@ public class DerivationTreePanel extends DerivationPanel {
 							modSum+node.modifier);
 				}
 				if (result == true && node.getNextSibling()!=null) {
-					result = secondWalk((UnrestrictedTreeNode)node.getNextSibling(), level+1, modSum);
+					result = secondWalk((UnrestrictedTreeNode)node.getNextSibling(), level, modSum);
 				}
 			} else {
 				result = false;
@@ -717,7 +752,7 @@ public class DerivationTreePanel extends DerivationPanel {
 			}
 			
 			double moveDistance = (neighbor.prelimX + leftModSum + SUBTREE_SEPARATION +
-					DefaultNodeDrawer.NODE_RADIUS) - (leftMost.prelimX + rightModSum);
+					MEAN_NODE_SIZE) - (leftMost.prelimX + rightModSum);
 			
 			if (moveDistance > 0) {
 				UnrestrictedTreeNode temp = node;
@@ -746,13 +781,15 @@ public class DerivationTreePanel extends DerivationPanel {
 			} else {
 				leftMost = (UnrestrictedTreeNode) leftMost.getFirstChild();
 			}
+			neighbor = leftMost.leftNeighbor;
 		}
 	}
 	
 	private boolean checkValidPosition(double x, double y) {
-		return (x>=0 && 
-				x<=this.realWidth && 
-				y>=0 && y<=this.realHeight);
+//		return (x>=0 && 
+//				x<=this.realWidth && 
+//				y>=0 && y<=this.realHeight);
+		return true;
 	}
 	
 	private UnrestrictedTreeNode getLeftMost(UnrestrictedTreeNode node, int level, int depth) {
@@ -767,9 +804,63 @@ public class DerivationTreePanel extends DerivationPanel {
 		return leftMost;
 	}
 	
-	private static final double LEVEL_SEPARATION = 5;
-	private static final int MAX_DEPTH = 5;
-	private static final double SIBLING_SEPARATION = 5;
-	private static final double SUBTREE_SEPARATION = 5;
+	private void paintTest (Graphics2D g, UnrestrictedTreeNode node, Point2D p) {
+		if (node == null) {
+			return;
+		}
+//		System.out.println(node.getText() + ":" + node.xCoord + ":" + node.yCoord);
+		g.setColor(INNER);
+		g.translate(p.getX(), p.getY());
+		nodeDrawer.draw(g, node);
+		g.translate(-p.getX(), -p.getY());
+		nodeDrawer.draw(g, node);
+		for (int i = 0; i < node.getChildCount(); i++) {
+			UnrestrictedTreeNode temp = (UnrestrictedTreeNode) node.getChildAt(i);
+			paintTest(g, temp, new Point2D.Double(temp.xCoord, temp.yCoord));
+		}
+		
+	}
+	
+	private UnrestrictedTreeNode buildTestTree() {
+		UnrestrictedTreeNode root = new UnrestrictedTreeNode(new Symbol("O"));
+		UnrestrictedTreeNode A = new UnrestrictedTreeNode(new Symbol("A"));
+		UnrestrictedTreeNode B = new UnrestrictedTreeNode(new Symbol("B"));
+		UnrestrictedTreeNode C = new UnrestrictedTreeNode(new Symbol("C"));
+		UnrestrictedTreeNode D = new UnrestrictedTreeNode(new Symbol("D"));
+		UnrestrictedTreeNode E = new UnrestrictedTreeNode(new Symbol("E"));
+		UnrestrictedTreeNode F = new UnrestrictedTreeNode(new Symbol("F"));
+		UnrestrictedTreeNode G = new UnrestrictedTreeNode(new Symbol("G"));
+		UnrestrictedTreeNode H = new UnrestrictedTreeNode(new Symbol("H"));
+		UnrestrictedTreeNode I = new UnrestrictedTreeNode(new Symbol("I"));
+		UnrestrictedTreeNode J = new UnrestrictedTreeNode(new Symbol("J"));
+		UnrestrictedTreeNode K = new UnrestrictedTreeNode(new Symbol("K"));
+		UnrestrictedTreeNode L = new UnrestrictedTreeNode(new Symbol("L"));
+		UnrestrictedTreeNode M = new UnrestrictedTreeNode(new Symbol("M"));
+		UnrestrictedTreeNode N = new UnrestrictedTreeNode(new Symbol("N"));
+		root.add(E);
+		root.add(F);
+		root.add(N);
+		E.add(A);
+		E.add(D);
+		D.add(B);
+		D.add(C);
+		N.add(G);
+		N.add(M);
+		M.add(H);
+		M.add(I);
+		M.add(J);
+		M.add(K);
+		M.add(L);
+		root.xCoord = realWidth/2;
+		root.yCoord = 200;
+		return root;
+	}
+	
+	private static final double LEVEL_SEPARATION = 50;
+	private static final int MAX_DEPTH = Integer.MAX_VALUE;
+	private static final double SIBLING_SEPARATION = 50;
+	private static final double SUBTREE_SEPARATION = 50;
+//	private static final double MEAN_NODE_SIZE = DefaultNodeDrawer.NODE_RADIUS;
 
+	private static final double MEAN_NODE_SIZE = 30;
 }
