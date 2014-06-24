@@ -77,13 +77,8 @@ public class DerivationTreePanel extends DerivationPanel {
 	public DerivationTreePanel(Derivation d, boolean inverted) {
 		this(new DefaultTreeModel(new DefaultMutableTreeNode()), inverted);
 		myAnswer = d;
-//		initTree();
-		root = buildTestTree();
 		setAnswer(d);
 		called = false;
-//		realWidth = getSize().width;
-//		realHeight = getSize().height;
-//		positionTree(root);
 	}
 
 	/**
@@ -151,13 +146,19 @@ public class DerivationTreePanel extends DerivationPanel {
 		g.fillRect(0, 0, d.width, d.height);
 		g.setColor(Color.black);
 		if (top != null) {
-//			paintTree(g);
-			realWidth = d.width;
-			realHeight = d.height;
-			positionTree(root);
-			paintTest(g, root, new Point2D.Double(root.xCoord, root.yCoord));
+//			paintUnrestrictedTree(g);
+			paintRestrictedTree(g, d);
 		}
 		g.dispose();
+	}
+	
+	private void paintRestrictedTree(Graphics2D g, Dimension d) {
+		realWidth = d.width;
+		realHeight = d.height;
+		initTree();
+//		root = buildTestTree();
+		positionTree(root);
+		paintTest(g, root, new Point2D.Double(root.xCoord, root.yCoord));
 	}
 
 	public TreeNode nodeAtPoint(Point2D point) {
@@ -405,7 +406,7 @@ public class DerivationTreePanel extends DerivationPanel {
 		}
 	}
 
-	private void paintTree(Graphics2D g) {
+	private void paintUnrestrictedTree(Graphics2D g) {
 		Dimension d = getSize();
 		realWidth = d.width;
 		realHeight = d.height;
@@ -740,6 +741,7 @@ public class DerivationTreePanel extends DerivationPanel {
 		while (leftMost != null && 
 				neighbor != null && 
 				compareDepth <= depthToStop) {
+			neighbor = leftMost.leftNeighbor;
 			double leftModSum = 0;
 			double rightModSum = 0;
 			UnrestrictedTreeNode ancestorLeftMost = leftMost;
@@ -764,7 +766,7 @@ public class DerivationTreePanel extends DerivationPanel {
 				if (temp != null) {
 					double portion = moveDistance / leftSiblings;
 					temp = node;
-					while (temp.equals(ancestorNeighbor)) {
+					while (!temp.equals(ancestorNeighbor)) {
 						temp.prelimX+=moveDistance;
 						temp.modifier+=moveDistance;
 						moveDistance-=portion;
@@ -781,7 +783,6 @@ public class DerivationTreePanel extends DerivationPanel {
 			} else {
 				leftMost = (UnrestrictedTreeNode) leftMost.getFirstChild();
 			}
-			neighbor = leftMost.leftNeighbor;
 		}
 	}
 	
@@ -804,11 +805,16 @@ public class DerivationTreePanel extends DerivationPanel {
 		return leftMost;
 	}
 	
+	/**
+	 * Draw out the tree on canvas. 
+	 * @param g
+	 * @param node
+	 * @param p
+	 */
 	private void paintTest (Graphics2D g, UnrestrictedTreeNode node, Point2D p) {
 		if (node == null) {
 			return;
 		}
-//		System.out.println(node.getText() + ":" + node.xCoord + ":" + node.yCoord);
 		g.setColor(INNER);
 		g.translate(p.getX(), p.getY());
 		nodeDrawer.draw(g, node);
@@ -816,6 +822,8 @@ public class DerivationTreePanel extends DerivationPanel {
 		nodeDrawer.draw(g, node);
 		for (int i = 0; i < node.getChildCount(); i++) {
 			UnrestrictedTreeNode temp = (UnrestrictedTreeNode) node.getChildAt(i);
+			g.setColor(Color.black);
+			g.drawLine((int)node.xCoord, (int)node.yCoord, (int)temp.xCoord, (int)temp.yCoord);
 			paintTest(g, temp, new Point2D.Double(temp.xCoord, temp.yCoord));
 		}
 		
