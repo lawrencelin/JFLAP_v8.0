@@ -47,6 +47,7 @@ public class DerivationTreePanel extends DerivationPanel {
 	private static final double SUBTREE_SEPARATION = 200;
 	// Size of the nodes
 	private static final double MEAN_NODE_SIZE = DefaultNodeDrawer.NODE_RADIUS;
+	private static final int CENTER_NODE_Y = 100;
 
 	private boolean amInverted;
 	private TreeDrawer treeDrawer;
@@ -127,7 +128,7 @@ public class DerivationTreePanel extends DerivationPanel {
 		
 		// pre-set coordinates of the root: top center
 		root.xCoord = realWidth / 2;
-		root.yCoord = 100;
+		root.yCoord = CENTER_NODE_Y;
 	}
 
 	/* (non-Javadoc)
