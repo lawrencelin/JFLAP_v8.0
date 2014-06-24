@@ -607,6 +607,13 @@ public class DerivationTreePanel extends DerivationPanel {
 		return ends(level - 1, group);
 	}
 	
+	/**
+	 * This method, by calling other methods, determines the coordinates
+	 * of each node. 
+	 * 
+	 * @param n
+	 * @return
+	 */
 	private boolean positionTree(UnrestrictedTreeNode n) {
 		if (n!=null) {
 			initPrevNodeList();
@@ -620,12 +627,11 @@ public class DerivationTreePanel extends DerivationPanel {
 		return true;
 	}
 	
+	/**
+	 * Initialize the list which contains a list of previous nodes
+	 * at each level. 
+	 */
 	private void initPrevNodeList() {
-//		UnrestrictedTreeNode temp = root;		
-//		while (temp!=null) {
-//			temp.prevNode = null;
-//			temp = temp.nextLevel;
-//		}
 		prevList = new LinkedList<UnrestrictedTreeNode>();
 	}
 	
@@ -643,42 +649,15 @@ public class DerivationTreePanel extends DerivationPanel {
 		}
 		prevList.set(level, node);
 	}
-
-//	private UnrestrictedTreeNode getPrevNodeAtLevel(int level) {
-//		UnrestrictedTreeNode temp = root;
-//		int i = 0;
-//		while (temp!=null) {
-//			if (i == level) {
-//				return temp.prevNode;
-//			}
-//			temp = temp.nextLevel;
-//			i++;
-//		}
-//		return null;
-//	}
-//	
-//	private void setPrevNodeAtLevel(int level, UnrestrictedTreeNode node) {
-//		UnrestrictedTreeNode temp = root;
-//		int i = 0;
-//		while (temp!=null) {
-//			if (i == level) {
-//				temp.prevNode = node;
-//				return;
-//			} else if (temp.nextLevel == null) {
-//				UnrestrictedTreeNode newNode = new UnrestrictedTreeNode();
-//				newNode.prevNode = null;
-//				newNode.nextLevel = null;
-//				temp.nextLevel = newNode;
-//			}
-//			temp = temp.nextLevel;
-//			i++;
-//		}
-//		// only get here if root is null
-//		root = new UnrestrictedTreeNode();
-//		root.prevNode = node;
-//		root.nextLevel = null;
-//	}
 	
+	/**
+	 * Post-order traversal to determine the preliminary x coordinate and the 
+	 * modifier value of each node. The values determined will be used in 
+	 * the second walk to finalize position of the nodes. 
+	 * 
+	 * @param node
+	 * @param level
+	 */
 	private void firstWalk(UnrestrictedTreeNode node, int level) {
 		node.leftNeighbor = getPrevNodeAtLevel(level);
 		setPrevNodeAtLevel(level, node);
@@ -710,6 +689,13 @@ public class DerivationTreePanel extends DerivationPanel {
 		}
 	}
 	
+	/**
+	 * Pre-order traversal to finalize the coordinates of the nodes. 
+	 * @param node
+	 * @param level
+	 * @param modSum
+	 * @return
+	 */
 	private boolean secondWalk(UnrestrictedTreeNode node, int level, double modSum) {
 		boolean result = true;
 		if (level <= MAX_DEPTH) {
@@ -733,6 +719,12 @@ public class DerivationTreePanel extends DerivationPanel {
 		return result;
 	}
 	
+	/**
+	 * Adjust the position of the subtree.
+	 * 
+	 * @param node
+	 * @param level
+	 */
 	private void apportion(UnrestrictedTreeNode node, int level) {
 		UnrestrictedTreeNode leftMost = (UnrestrictedTreeNode) node.getFirstChild();
 		UnrestrictedTreeNode neighbor = leftMost.leftNeighbor;
@@ -786,6 +778,12 @@ public class DerivationTreePanel extends DerivationPanel {
 		}
 	}
 	
+	/**
+	 * Check whether the coordinates are within the bounds of the canvas. 
+	 * @param x
+	 * @param y
+	 * @return
+	 */
 	private boolean checkValidPosition(double x, double y) {
 //		return (x>=0 && 
 //				x<=this.realWidth && 
@@ -793,6 +791,16 @@ public class DerivationTreePanel extends DerivationPanel {
 		return true;
 	}
 	
+	/**
+	 * Return the left-most descendant of a node at a given depth, implemented
+	 * using a post-order traversal. 
+	 * The level here is not the absolute level; it means the level below the node
+	 * whose descendant is to be found. 
+	 * @param node
+	 * @param level
+	 * @param depth
+	 * @return
+	 */
 	private UnrestrictedTreeNode getLeftMost(UnrestrictedTreeNode node, int level, int depth) {
 		if (level>=depth) return node;
 		if (node.isLeaf()) return null;
