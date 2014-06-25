@@ -833,7 +833,12 @@ public class DerivationTreePanel extends DerivationPanel {
 		if (node == null) {
 			return;
 		}
-		g.setColor(INNER);
+		if (node.getChildCount() > 0) {
+			g.setColor(INNER);
+		} else {
+			g.setColor(LEAF);
+		}
+		
 		g.translate(p.getX(), p.getY());
 		nodeDrawer.draw(g, node);
 		g.translate(-p.getX(), -p.getY());
