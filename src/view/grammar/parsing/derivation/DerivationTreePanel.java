@@ -838,13 +838,13 @@ public class DerivationTreePanel extends DerivationPanel {
 		} else {
 			g.setColor(LEAF);
 		}
-		
+		// draw out the node
 		g.translate(p.getX(), p.getY());
 		nodeDrawer.draw(g, node);
 		g.translate(-p.getX(), -p.getY());
-		nodeDrawer.draw(g, node);
 		for (int i = 0; i < node.getChildCount(); i++) {
 			UnrestrictedTreeNode temp = (UnrestrictedTreeNode) node.getChildAt(i);
+			// draw line
 			g.setColor(Color.black);
 			g.drawLine((int)node.xCoord, (int)node.yCoord, (int)temp.xCoord, (int)temp.yCoord);
 			paintTest(g, temp, new Point2D.Double(temp.xCoord, temp.yCoord));
