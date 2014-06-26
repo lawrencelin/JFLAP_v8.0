@@ -144,6 +144,9 @@ public class DerivationTreePanel extends DerivationPanel {
 		}
 		
 		// reset level counter
+		// if we want to step back:
+//		myLevel = myAnswer.getSubstitutionArray().length;
+		// if we want normal stepping forward:
 		myLevel = 0;
 	}
 
@@ -160,6 +163,13 @@ public class DerivationTreePanel extends DerivationPanel {
 		{
 			//next();
 			myLevel++;
+//			stepBack();
+		}
+	}
+	
+	public void stepBack() {
+		if (myLevel > 0) {
+			myLevel--;
 		}
 	}
 
@@ -654,19 +664,19 @@ public class DerivationTreePanel extends DerivationPanel {
 	 */
 	private boolean positionTree(UnrestrictedTreeNode n) {
 		finalAdjustment = 0;
-		// pre-set coordinates of the root: top center
-		n.xCoord = realWidth / 2;
-		
-//		int child = n.getChildCount();
-//		int i = child / 2;
-//		int leftPortion = 0;
-//		for (int j = 0; j < i; j++) {
-//			leftPortion+= ((UnrestrictedTreeNode) n.getChildAt(j)).getLeafCount();
-//		}
-//		n.xCoord = realWidth * leftPortion / n.getLeafCount();
-		
-		n.yCoord = CENTER_NODE_Y;
+
 		if (n!=null) {
+			// pre-set coordinates of the root: top center
+			n.xCoord = realWidth / 2;
+//			int child = n.getChildCount();
+//			int i = child / 2;
+//			int leftPortion = 0;
+//			for (int j = 0; j < i; j++) {
+//				leftPortion+= ((UnrestrictedTreeNode) n.getChildAt(j)).getLeafCount();
+//			}
+//			n.xCoord = realWidth * leftPortion / n.getLeafCount();
+			
+			n.yCoord = CENTER_NODE_Y;
 			initPrevNodeList();
 			firstWalk(n, 0);
 			xTopAdjustment = n.xCoord - n.prelimX; 
