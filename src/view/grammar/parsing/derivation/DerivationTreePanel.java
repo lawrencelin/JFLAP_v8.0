@@ -39,15 +39,15 @@ public class DerivationTreePanel extends DerivationPanel {
 			BRACKET = new Color(150, 150, 255), // purple
 			BRACKET_OUT = BRACKET.darker().darker();
 	// Minimum distance between levels of nodes
-	private static final double LEVEL_SEPARATION = 50;
+	private static final double LEVEL_SEPARATION = 30;
 	private static final int MAX_DEPTH = Integer.MAX_VALUE;
 	// Minimum separation desitance between sibling nodes
-	private static final double SIBLING_SEPARATION = 100;
+	private static final double SIBLING_SEPARATION = 10;
 	// Minimum separation desitance between subtrees
-	private static final double SUBTREE_SEPARATION = 200;
+	private static final double SUBTREE_SEPARATION = 10;
 	// Size of the nodes
 	private static final double MEAN_NODE_SIZE = DefaultNodeDrawer.NODE_RADIUS;
-	private static final int CENTER_NODE_Y = 100;
+	private static final int CENTER_NODE_Y = (int) (2*DefaultNodeDrawer.NODE_RADIUS);
 
 	private boolean amInverted;
 	private TreeDrawer treeDrawer;
@@ -66,6 +66,9 @@ public class DerivationTreePanel extends DerivationPanel {
 	private double xTopAdjustment;
 	private double yTopAdjustment;
 	private List<UnrestrictedTreeNode> prevList;
+	private double levelSeparation;
+	private double siblingSeparation;
+	private double subtreeSeparation;
 
 	private Derivation myAnswer;
 
@@ -166,6 +169,12 @@ public class DerivationTreePanel extends DerivationPanel {
 		realWidth = d.width;
 		realHeight = d.height;
 		initTree();
+		levelSeparation = (realHeight-CENTER_NODE_Y)/root.getDepth() - DefaultNodeDrawer.NODE_RADIUS;
+		siblingSeparation = realWidth / root.getLeafCount();
+		subtreeSeparation = DefaultNodeDrawer.NODE_RADIUS;
+//		levelSeparation = 30;
+//		siblingSeparation = 30;
+//		subtreeSeparation = 30;
 //		root = buildTestTree();
 		positionTree(root);
 		paintTest(g, root, new Point2D.Double(root.xCoord, root.yCoord));
@@ -630,8 +639,6 @@ public class DerivationTreePanel extends DerivationPanel {
 			firstWalk(n, 0);
 			xTopAdjustment = n.xCoord - n.prelimX; 
 			yTopAdjustment = n.yCoord; 
-//			xTopAdjustment = 0;
-//			yTopAdjustment = 0;
 			return secondWalk(n, 0 , 0);
 		} 
 		return true;
@@ -675,7 +682,7 @@ public class DerivationTreePanel extends DerivationPanel {
 		if (node.isLeaf() || level == MAX_DEPTH) {
 			if (node.getPreviousSibling() != null) {
 				node.prelimX = ((UnrestrictedTreeNode) node.getPreviousSibling()).prelimX +
-						SIBLING_SEPARATION + MEAN_NODE_SIZE;
+						siblingSeparation + MEAN_NODE_SIZE;
 			} else {
 				node.prelimX = 0;
 			}
@@ -690,7 +697,7 @@ public class DerivationTreePanel extends DerivationPanel {
 			double midPoint = (leftMost.prelimX + rightMost.prelimX) /2;
 			if (node.getPreviousSibling() != null) {
 				node.prelimX = ((UnrestrictedTreeNode) node.getPreviousSibling()).prelimX +
-						SIBLING_SEPARATION + MEAN_NODE_SIZE;
+						siblingSeparation + MEAN_NODE_SIZE;
 				node.modifier = node.prelimX - midPoint;
 				apportion(node, level);
 			} else {
@@ -710,7 +717,7 @@ public class DerivationTreePanel extends DerivationPanel {
 		boolean result = true;
 		if (level <= MAX_DEPTH) {
 			double xTemp = xTopAdjustment + node.prelimX + modSum;
-			double yTemp = yTopAdjustment + (level * LEVEL_SEPARATION);
+			double yTemp = yTopAdjustment + (level * levelSeparation);
 			if (checkValidPosition(xTemp, yTemp)) {
 				node.xCoord = xTemp;
 				node.yCoord = yTemp;
@@ -755,7 +762,7 @@ public class DerivationTreePanel extends DerivationPanel {
 				leftModSum += ancestorNeighbor.modifier;
 			}
 			
-			double moveDistance = (neighbor.prelimX + leftModSum + SUBTREE_SEPARATION +
+			double moveDistance = (neighbor.prelimX + leftModSum + subtreeSeparation +
 					MEAN_NODE_SIZE) - (leftMost.prelimX + rightModSum);
 			
 			if (moveDistance > 0) {
@@ -795,10 +802,10 @@ public class DerivationTreePanel extends DerivationPanel {
 	 * @return
 	 */
 	private boolean checkValidPosition(double x, double y) {
-//		return (x>=0 && 
-//				x<=this.realWidth && 
-//				y>=0 && y<=this.realHeight);
-		return true;
+		return (x>=0 && 
+				x<=this.realWidth && 
+				y>=0 && y<=this.realHeight);
+//		return true;
 	}
 	
 	/**
