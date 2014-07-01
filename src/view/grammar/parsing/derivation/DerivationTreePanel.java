@@ -32,6 +32,7 @@ import universe.preferences.JFLAPPreferences;
 
 public class DerivationTreePanel extends DerivationPanel {
 
+	private static final String LAMBDA = "\u03BB";
 	private static final Color INNER = new Color(100, 200, 120),
 			LEAF = new Color(255, 255, 100),
 			BRACKET = new Color(150, 150, 255), // purple
@@ -135,6 +136,11 @@ public class DerivationTreePanel extends DerivationPanel {
 			// since it is restricted grammar, lhs should only have one symbol. right?
 			Symbol lhs = currentProd.getLHS()[0];
 			Symbol[] rhs = currentProd.getRHS();
+			// Lamdba correction:
+			if (rhs.length == 0) {
+			    rhs = new Symbol[1];
+			    rhs[0] = new Symbol(LAMBDA);
+			}
 			if (curNodes.isEmpty()) {
 				root = new UnrestrictedTreeNode(lhs);
 				curNodes.add(root);
@@ -166,7 +172,7 @@ public class DerivationTreePanel extends DerivationPanel {
 			myLevel++;
 		}
 
-		// reset level counter
+		// Reset level counter
 		// if we want to step back:
 		//		myLevel = myAnswer.getSubstitutionArray().length;
 		// if we want normal stepping forward:
@@ -962,6 +968,16 @@ public class DerivationTreePanel extends DerivationPanel {
 			System.out.print(n.getChildAt(i) + ",");
 		}
 		System.out.println();
+	}
+	
+	private void printTree(UnrestrictedTreeNode n) {
+		if (n == null)	{
+			return;
+		}
+		System.out.print(n.getText());
+		for (int i = 0; i < n.getChildCount(); i++) {
+			printTree((UnrestrictedTreeNode) n.getChildAt(i));
+		}
 	}
 
 	private UnrestrictedTreeNode buildTestTree() {
