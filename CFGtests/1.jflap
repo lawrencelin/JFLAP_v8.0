@@ -7,6 +7,10 @@
 	</structure>
 	<structure type="production_set">
 		<production>
+			<rhs>AA</rhs>
+			<lhs>A</lhs>
+		</production>
+		<production>
 			<rhs>a</rhs>
 			<lhs>A</lhs>
 		</production>
@@ -15,15 +19,11 @@
 			<lhs>A</lhs>
 		</production>
 		<production>
-			<rhs>AA</rhs>
-			<lhs>A</lhs>
-		</production>
-		<production>
-			<rhs>bb</rhs>
+			<rhs>bCB</rhs>
 			<lhs>B</lhs>
 		</production>
 		<production>
-			<rhs>bCB</rhs>
+			<rhs>bb</rhs>
 			<lhs>B</lhs>
 		</production>
 		<production>
@@ -39,13 +39,13 @@
 			<lhs>S</lhs>
 		</production>
 	</structure>
-	<structure type="start_var">
-		<value>S</value>
-	</structure>
 	<structure type="variable_alph">
 		<symbol>A</symbol>
 		<symbol>B</symbol>
 		<symbol>C</symbol>
 		<symbol>S</symbol>
+	</structure>
+	<structure type="start_var">
+		<value>S</value>
 	</structure>
 </structure>

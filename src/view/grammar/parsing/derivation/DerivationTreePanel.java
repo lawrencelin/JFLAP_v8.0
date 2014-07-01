@@ -99,11 +99,11 @@ public class DerivationTreePanel extends DerivationPanel {
 		// initialize restricted tree
 		initTree();
 
-//		 test
-//				levelSeparation = 4;
-//				siblingSeparation = 4;
-//				subtreeSeparation = 2;
-//				positionTree(root);
+		//		 test
+		//				levelSeparation = 4;
+		//				siblingSeparation = 4;
+		//				subtreeSeparation = 2;
+		//				positionTree(root);
 		//		printPosition(root);
 		//		printChildren(root);
 		//		printChildren((UnrestrictedTreeNode)root.getChildAt(1).getChildAt(1));
@@ -138,8 +138,8 @@ public class DerivationTreePanel extends DerivationPanel {
 			Symbol[] rhs = currentProd.getRHS();
 			// Lamdba correction:
 			if (rhs.length == 0) {
-			    rhs = new Symbol[1];
-			    rhs[0] = new Symbol(LAMBDA);
+				rhs = new Symbol[1];
+				rhs[0] = new Symbol(LAMBDA);
 			}
 			if (curNodes.isEmpty()) {
 				root = new UnrestrictedTreeNode(lhs);
@@ -167,6 +167,14 @@ public class DerivationTreePanel extends DerivationPanel {
 			temp.addAll(curNodes.subList(index+1, curNodes.size()));
 			curNodes.clear();
 			curNodes.addAll(temp);
+			for (int j = 0; j < curNodes.size(); j++) {
+				// Remove lambda nodes from the list so as not to mess up with the derivation
+				// Failure to do so will result in an incorrect parse tree
+				if (curNodes.get(j).getText().toString().equals(LAMBDA)) {
+					curNodes.remove(j);
+					j--;
+				}
+			}
 			childrenList.clear();
 			temp.clear();
 			myLevel++;
@@ -832,7 +840,7 @@ public class DerivationTreePanel extends DerivationPanel {
 		while (leftMost != null && 
 				neighbor != null && 
 				compareDepth <= depthToStop) {
-			
+
 			double leftModSum = 0;
 			double rightModSum = 0;
 			UnrestrictedTreeNode ancestorLeftMost = leftMost;
@@ -972,7 +980,7 @@ public class DerivationTreePanel extends DerivationPanel {
 		}
 		System.out.println();
 	}
-	
+
 	private void printTree(UnrestrictedTreeNode n) {
 		if (n == null)	{
 			return;
