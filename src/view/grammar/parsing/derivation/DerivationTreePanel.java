@@ -8,9 +8,7 @@ import java.awt.RenderingHints;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -71,6 +69,7 @@ public class DerivationTreePanel extends DerivationPanel {
 	private double subtreeSeparation;
 	private Map<Integer, List<UnrestrictedTreeNode>> nodesToDraw;
 	private double finalAdjustment;
+	private boolean isUnrestrictedGrammar;
 
 	private Derivation myAnswer;
 
@@ -83,6 +82,7 @@ public class DerivationTreePanel extends DerivationPanel {
 		nodeToParentGroup = new HashMap<UnrestrictedTreeNode, List<UnrestrictedTreeNode>>();
 		nodeToParentWeights = new HashMap<UnrestrictedTreeNode, Double>();
 		amInverted = inverted;
+		isUnrestrictedGrammar = false;
 	}
 
 	public DerivationTreePanel(TreeModel tree, boolean inverted) {
@@ -94,8 +94,31 @@ public class DerivationTreePanel extends DerivationPanel {
 		myAnswer = d;
 		setAnswer(d);
 		called = false;
+		checkGrammarType();
 		// initialize restricted tree
 		initTree();
+
+		// test
+		//		levelSeparation = 4;
+		//		siblingSeparation = 4;
+		//		subtreeSeparation = 2;
+		//		positionTree(root);
+		//		printPosition(root);
+		//		printChildren(root);
+		//		printChildren((UnrestrictedTreeNode)root.getChildAt(1).getChildAt(1));
+	}
+
+	/**
+	 * Determine if the grammar is unrestricted grammar. 
+	 * @return
+	 */
+	private boolean checkGrammarType() {
+		for (Production p : myAnswer.getProductionArray()) {
+			if (p.getLHS().length > 1) {
+				isUnrestrictedGrammar = true;
+			}
+		}
+		return isUnrestrictedGrammar;
 	}
 
 	/**
@@ -142,10 +165,10 @@ public class DerivationTreePanel extends DerivationPanel {
 			temp.clear();
 			myLevel++;
 		}
-		
+
 		// reset level counter
 		// if we want to step back:
-//		myLevel = myAnswer.getSubstitutionArray().length;
+		//		myLevel = myAnswer.getSubstitutionArray().length;
 		// if we want normal stepping forward:
 		myLevel = 0;
 	}
@@ -161,12 +184,15 @@ public class DerivationTreePanel extends DerivationPanel {
 			called = true;
 		else
 		{
-			//next();
-			myLevel++;
-//			stepBack();
+			if (isUnrestrictedGrammar) {
+				next();
+			} else {
+				myLevel++;
+				//				stepBack();
+			}
 		}
 	}
-	
+
 	public void stepBack() {
 		if (myLevel > 0) {
 			myLevel--;
@@ -185,8 +211,11 @@ public class DerivationTreePanel extends DerivationPanel {
 		realWidth = d.width;
 		realHeight = d.height;
 		if (top != null) {
-			//			paintUnrestrictedTree(g);
-			paintRestrictedTree(g);
+			if (isUnrestrictedGrammar) {
+				paintUnrestrictedTree(g);
+			} else {
+				paintRestrictedTree(g);
+			}
 		}
 		g.dispose();
 	}
@@ -668,14 +697,14 @@ public class DerivationTreePanel extends DerivationPanel {
 		if (n!=null) {
 			// pre-set coordinates of the root: top center
 			n.xCoord = realWidth / 2;
-//			int child = n.getChildCount();
-//			int i = child / 2;
-//			int leftPortion = 0;
-//			for (int j = 0; j < i; j++) {
-//				leftPortion+= ((UnrestrictedTreeNode) n.getChildAt(j)).getLeafCount();
-//			}
-//			n.xCoord = realWidth * leftPortion / n.getLeafCount();
-			
+			//			int child = n.getChildCount();
+			//			int i = child / 2;
+			//			int leftPortion = 0;
+			//			for (int j = 0; j < i; j++) {
+			//				leftPortion+= ((UnrestrictedTreeNode) n.getChildAt(j)).getLeafCount();
+			//			}
+			//			n.xCoord = realWidth * leftPortion / n.getLeafCount();
+
 			n.yCoord = CENTER_NODE_Y;
 			initPrevNodeList();
 			firstWalk(n, 0);
@@ -760,26 +789,26 @@ public class DerivationTreePanel extends DerivationPanel {
 		if (level <= MAX_DEPTH) {
 			double xTemp = xTopAdjustment + node.prelimX + modSum;
 			double yTemp = yTopAdjustment + (level * levelSeparation);
-//			if (checkValidPosition(xTemp, yTemp)) {
-				node.xCoord = xTemp;
-				node.yCoord = yTemp;
-				if (!node.isLeaf()) {
-					result = secondWalk((UnrestrictedTreeNode)node.getFirstChild(), 
-							level+1, 
-							modSum+node.modifier);
-				}
-				if (result == true && node.getNextSibling()!=null) {
-					result = secondWalk((UnrestrictedTreeNode)node.getNextSibling(), level, modSum);
-				}
-//			} else {
-				if (xTemp < 0) {
-					finalAdjustment = Math.min(finalAdjustment, xTemp);
-				} else if (xTemp > realWidth) {
-					finalAdjustment = Math.max(finalAdjustment, xTemp);
-				}
-//				result = false;
+			//			if (checkValidPosition(xTemp, yTemp)) {
+			node.xCoord = xTemp;
+			node.yCoord = yTemp;
+			if (!node.isLeaf()) {
+				result = secondWalk((UnrestrictedTreeNode)node.getFirstChild(), 
+						level+1, 
+						modSum+node.modifier);
 			}
-//		}
+			if (result == true && node.getNextSibling()!=null) {
+				result = secondWalk((UnrestrictedTreeNode)node.getNextSibling(), level, modSum);
+			}
+			//			} else {
+			if (xTemp < 0) {
+				finalAdjustment = Math.min(finalAdjustment, xTemp);
+			} else if (xTemp > realWidth) {
+				finalAdjustment = Math.max(finalAdjustment, xTemp);
+			}
+			//				result = false;
+		}
+		//		}
 		return result;
 	}
 
@@ -876,7 +905,7 @@ public class DerivationTreePanel extends DerivationPanel {
 		}
 		return leftMost;
 	}
-	
+
 	private void adjust(UnrestrictedTreeNode n) {
 		if (n == null) {
 			return;
@@ -918,10 +947,22 @@ public class DerivationTreePanel extends DerivationPanel {
 			g.translate(-p.getX(), -p.getY());
 		}
 	}
-	
-//	private double getLeafWidth(UnrestrictedTreeNode n) {
-//		double count = 0;
-//	}
+
+	private void printPosition(UnrestrictedTreeNode n) {
+		if (n == null) return;
+		System.out.println(n.getText() + ":" + n.xCoord + "," + n.yCoord);
+		for (int i = 0; i < n.getChildCount(); i++) {
+			printPosition((UnrestrictedTreeNode) n.getChildAt(i));
+		}
+	}
+
+	private void printChildren(UnrestrictedTreeNode n) {
+		System.out.print(n.getText()+":");
+		for (int i = 0; i < n.getChildCount(); i++) {
+			System.out.print(n.getChildAt(i) + ",");
+		}
+		System.out.println();
+	}
 
 	private UnrestrictedTreeNode buildTestTree() {
 		UnrestrictedTreeNode root = new UnrestrictedTreeNode(new Symbol("O"));
