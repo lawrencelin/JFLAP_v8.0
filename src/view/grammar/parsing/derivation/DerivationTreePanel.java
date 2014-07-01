@@ -99,11 +99,11 @@ public class DerivationTreePanel extends DerivationPanel {
 		// initialize restricted tree
 		initTree();
 
-		// test
-		//		levelSeparation = 4;
-		//		siblingSeparation = 4;
-		//		subtreeSeparation = 2;
-		//		positionTree(root);
+//		 test
+//				levelSeparation = 4;
+//				siblingSeparation = 4;
+//				subtreeSeparation = 2;
+//				positionTree(root);
 		//		printPosition(root);
 		//		printChildren(root);
 		//		printChildren((UnrestrictedTreeNode)root.getChildAt(1).getChildAt(1));
@@ -832,7 +832,7 @@ public class DerivationTreePanel extends DerivationPanel {
 		while (leftMost != null && 
 				neighbor != null && 
 				compareDepth <= depthToStop) {
-			neighbor = leftMost.leftNeighbor;
+			
 			double leftModSum = 0;
 			double rightModSum = 0;
 			UnrestrictedTreeNode ancestorLeftMost = leftMost;
@@ -873,6 +873,9 @@ public class DerivationTreePanel extends DerivationPanel {
 				leftMost = getLeftMost(node, 0 ,compareDepth);
 			} else {
 				leftMost = (UnrestrictedTreeNode) leftMost.getFirstChild();
+			}
+			if (leftMost != null) {
+				neighbor = leftMost.leftNeighbor;
 			}
 		}
 	}
