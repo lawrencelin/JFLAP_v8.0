@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?><structure mode="Default mode" type="grammar">
+	<structure type="terminal_alph">
+		<symbol>a</symbol>
+		<symbol>b</symbol>
+	</structure>
+	<structure type="start_var">
+		<value>S</value>
+	</structure>
+	<structure type="variable_alph">
+		<symbol>B</symbol>
+		<symbol>S</symbol>
+	</structure>
+	<structure type="production_set">
+		<production>
+			<rhs/>
+			<lhs>B</lhs>
+		</production>
+		<production>
+			<rhs>bbB</rhs>
+			<lhs>B</lhs>
+		</production>
+		<production>
+			<rhs>bB</rhs>
+			<lhs>S</lhs>
+		</production>
+		<production>
+			<rhs>aSb</rhs>
+			<lhs>S</lhs>
+		</production>
+	</structure>
+</structure>
