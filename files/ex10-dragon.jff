@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!-- Created with JFLAP 4.0b10. -->
+<structure>
+	<type>lsystem</type>
+	<!--The L-system axiom.-->
+	<axiom>g X</axiom>
+	<!--The rewriting rules.-->
+	<production>
+		<left>X</left>
+		<right>- g X + + g Y -</right>
+	</production>
+	<production>
+		<left>Y</left>
+		<right>+ g X - - g Y +</right>
+	</production>
+	<production>
+		<left>g</left>
+		<right></right>
+	</production>
+	<!--The drawing parameters.-->
+	<parameter>
+		<name>angle</name>
+		<value>45</value>
+	</parameter>
+	<parameter>
+		<name>distance</name>
+		<value>5</value>
+	</parameter>
+</structure>

@@ -45,7 +45,6 @@ public class DerivationTreePanel extends DerivationPanel {
 	// Minimum separation desitance between subtrees
 	private static final double SUBTREE_SEPARATION = 10;
 	// Size of the nodes
-	private static final double MEAN_NODE_SIZE = DefaultNodeDrawer.NODE_RADIUS;
 	private static final int CENTER_NODE_Y = (int) (2*DefaultNodeDrawer.NODE_RADIUS);
 
 	private boolean amInverted;
@@ -182,7 +181,7 @@ public class DerivationTreePanel extends DerivationPanel {
 
 		// Reset level counter
 		// if we want to step back:
-		//		myLevel = myAnswer.getSubstitutionArray().length;
+//				myLevel = myAnswer.getSubstitutionArray().length;
 		// if we want normal stepping forward:
 		myLevel = 0;
 	}
@@ -237,19 +236,19 @@ public class DerivationTreePanel extends DerivationPanel {
 	private void paintRestrictedTree(Graphics2D g) {
 		levelSeparation = (realHeight-CENTER_NODE_Y)/root.getDepth() - DefaultNodeDrawer.NODE_RADIUS;
 		siblingSeparation = realWidth / root.getLeafCount();
-		subtreeSeparation = DefaultNodeDrawer.NODE_RADIUS;
+		subtreeSeparation = 2*nodeDrawer.nodeRadius;
 
 		//		root = buildTestTree();
 		positionTree(root);
 		if (finalAdjustment != 0) {
 			if (finalAdjustment < 0) {
-				finalAdjustment-=DefaultNodeDrawer.NODE_RADIUS;
+				finalAdjustment-=nodeDrawer.nodeRadius;
 			} else {
-				finalAdjustment+=DefaultNodeDrawer.NODE_RADIUS;
+				finalAdjustment+=nodeDrawer.nodeRadius;
 			}
 		}
 		adjust(root);
-		paintTest(g, root, new Point2D.Double(root.xCoord, root.yCoord));
+		paintTree(g, root, new Point2D.Double(root.xCoord, root.yCoord));
 	}
 
 	public TreeNode nodeAtPoint(Point2D point) {
@@ -550,7 +549,7 @@ public class DerivationTreePanel extends DerivationPanel {
 								Point2D beta = (Point2D) nodeToPoint.get(parent
 										.get(parent.size() - 1));
 								g.setColor(BRACKET);
-								int radius = (int) DefaultNodeDrawer.NODE_RADIUS;
+								int radius = (int) nodeDrawer.nodeRadius;
 								int ax = (int) (alpha.getX() - radius - 3);
 								int ay = (int) (alpha.getY() - radius - 3);
 								g.fillRoundRect(ax, ay, (int) (beta.getX()
@@ -592,7 +591,7 @@ public class DerivationTreePanel extends DerivationPanel {
 								Point2D beta = nodeToPoint.get(parent
 										.get(parent.size() - 1));
 								g.setColor(BRACKET);
-								int radius = (int) DefaultNodeDrawer.NODE_RADIUS;
+								int radius = (int) nodeDrawer.nodeRadius;
 								int ax = (int) (alpha.getX() - radius - 3);
 								int ay = (int) (alpha.getY() - radius - 3);
 								g.fillRoundRect(ax, ay, (int) (beta.getX()
@@ -767,7 +766,7 @@ public class DerivationTreePanel extends DerivationPanel {
 		if (node.isLeaf() || level == MAX_DEPTH) {
 			if (node.getPreviousSibling() != null) {
 				node.prelimX = ((UnrestrictedTreeNode) node.getPreviousSibling()).prelimX +
-						siblingSeparation + MEAN_NODE_SIZE;
+						siblingSeparation + nodeDrawer.nodeRadius;
 			} else {
 				node.prelimX = 0;
 			}
@@ -782,7 +781,7 @@ public class DerivationTreePanel extends DerivationPanel {
 			double midPoint = (leftMost.prelimX + rightMost.prelimX) /2;
 			if (node.getPreviousSibling() != null) {
 				node.prelimX = ((UnrestrictedTreeNode) node.getPreviousSibling()).prelimX +
-						siblingSeparation + MEAN_NODE_SIZE;
+						siblingSeparation + nodeDrawer.nodeRadius;
 				node.modifier = node.prelimX - midPoint;
 				apportion(node, level);
 			} else {
@@ -853,7 +852,7 @@ public class DerivationTreePanel extends DerivationPanel {
 			}
 
 			double moveDistance = (neighbor.prelimX + leftModSum + subtreeSeparation +
-					MEAN_NODE_SIZE) - (leftMost.prelimX + rightModSum);
+					nodeDrawer.nodeRadius) - (leftMost.prelimX + rightModSum);
 
 			if (moveDistance > 0) {
 				UnrestrictedTreeNode temp = node;
@@ -939,7 +938,7 @@ public class DerivationTreePanel extends DerivationPanel {
 	 * @param node
 	 * @param p
 	 */
-	private void paintTest (Graphics2D g, UnrestrictedTreeNode node, Point2D p) {
+	private void paintTree (Graphics2D g, UnrestrictedTreeNode node, Point2D p) {
 		if (node == null) {
 			return;
 		}
@@ -950,7 +949,7 @@ public class DerivationTreePanel extends DerivationPanel {
 				g.setColor(Color.black);
 				g.drawLine((int)node.xCoord, (int)node.yCoord, (int)temp.xCoord, (int)temp.yCoord);
 			}
-			paintTest(g, temp, new Point2D.Double(temp.xCoord, temp.yCoord));
+			paintTree(g, temp, new Point2D.Double(temp.xCoord, temp.yCoord));
 		}
 		if (node.getChildCount() > 0) {
 			g.setColor(INNER);
@@ -1024,5 +1023,10 @@ public class DerivationTreePanel extends DerivationPanel {
 		root.xCoord = realWidth/2;
 		root.yCoord = 200;
 		return root;
+	}
+	
+	@Override
+	protected void additionalMagnificationAction(double mag) {
+		nodeDrawer.magnify(mag);
 	}
 }
