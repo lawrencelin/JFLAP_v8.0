@@ -29,10 +29,11 @@ import oldnewstuff.view.tree.DefaultTreeDrawer;
 import oldnewstuff.view.tree.TreeDrawer;
 import oldnewstuff.view.tree.UnrestrictedTreeNode;
 import universe.preferences.JFLAPPreferences;
+import util.JFLAPConstants;
 
 public class DerivationTreePanel extends DerivationPanel {
 
-	private static final String LAMBDA = "\u03BB";
+//	private static final String LAMBDA = "\u03BB";
 	private static final Color INNER = new Color(100, 200, 120),
 			LEAF = new Color(255, 255, 100),
 			BRACKET = new Color(150, 150, 255), // purple
@@ -131,7 +132,7 @@ public class DerivationTreePanel extends DerivationPanel {
 			// Lamdba correction:
 			if (rhs.length == 0) {
 				rhs = new Symbol[1];
-				rhs[0] = new Symbol(LAMBDA);
+				rhs[0] = new Symbol(JFLAPConstants.LAMBDA);
 			}
 			if (curNodes.isEmpty()) {
 				root = new UnrestrictedTreeNode(lhs);
@@ -162,7 +163,7 @@ public class DerivationTreePanel extends DerivationPanel {
 			for (int j = 0; j < curNodes.size(); j++) {
 				// Remove lambda nodes from the list so as not to mess up with the derivation
 				// Failure to do so will result in an incorrect parse tree
-				if (curNodes.get(j).getText().toString().equals(LAMBDA)) {
+				if (curNodes.get(j).getText().toString().equals(JFLAPConstants.LAMBDA)) {
 					curNodes.remove(j);
 					j--;
 				}
