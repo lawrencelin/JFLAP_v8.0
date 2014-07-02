@@ -44,7 +44,6 @@ public class AutomatonDrawer<T extends Transition<T>> extends
 		List<T> transitions = graph.getOrderedTransitions(from, to);
 		Point2D pFrom = graph.pointForVertex(from);
 		Point2D pTo = graph.pointForVertex(to);
-
 		drawLabels(transitions, g, graph, pFrom, pTo);
 		// Point2D ctrl = graph.getControlPt(from, to);
 		// drawPoint(g, ctrl);

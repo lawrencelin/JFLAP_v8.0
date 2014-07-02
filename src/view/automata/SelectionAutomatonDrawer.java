@@ -2,6 +2,7 @@ package view.automata;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.Point2D;
@@ -26,7 +27,7 @@ import util.view.GraphHelper;
  * Automaton Drawer that allows for and keeps track of selection of States,
  * Arrows, and Transitions and draws them accordingly.
  * 
- * @author Ian McMahon
+ * @author Ian McMahon, Lawrence Lin
  */
 public class SelectionAutomatonDrawer<T extends Transition<T>> extends
 		AutomatonDrawer<T> {
@@ -35,6 +36,7 @@ public class SelectionAutomatonDrawer<T extends Transition<T>> extends
 	private Set<State[]> mySelectedEdges;
 	private Set<T> mySelectedTrans;
 	private Set<Note> mySelectedNotes;
+	private Font font = JFLAPConstants.DEFAULT_FONT;
 
 	public SelectionAutomatonDrawer(StateDrawer vDraw) {
 		super(vDraw);
@@ -72,6 +74,7 @@ public class SelectionAutomatonDrawer<T extends Transition<T>> extends
 	@Override
 	public void drawLabel(Graphics2D g2d, T t, TransitionGraph<T> graph,
 			Point2D center) {
+		g2d.setFont(font);
 		if (isSelected(t)) {
 			Color oldColor = g2d.getColor();
 			g2d.setColor(JFLAPPreferences.getSelectedTransitionColor());
@@ -82,6 +85,14 @@ public class SelectionAutomatonDrawer<T extends Transition<T>> extends
 			g2d.setColor(oldColor);
 		} else
 			super.drawLabel(g2d, t, graph, center);
+	}
+	
+	/**
+	 * Change the size of the labels.
+	 * @param mag
+	 */
+	public void magnifyLabel(double mag) {
+		font = font.deriveFont((float) (JFLAPConstants.DEFAULT_FONT.getSize2D() * 2 * mag));
 	}
 
 	/** Selects or deselects the given object based on <CODE>select</CODE> */

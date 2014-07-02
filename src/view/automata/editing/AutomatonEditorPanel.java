@@ -132,7 +132,6 @@ public class AutomatonEditorPanel<T extends Automaton<S>, S extends Transition<S
 
 	@Override
 	protected void paintChildren(Graphics g) {
-
 		super.paintChildren(g);
 		for (Note n : myNotes.keySet()) {
 			if (getSelection().contains(n))
@@ -153,8 +152,11 @@ public class AutomatonEditorPanel<T extends Automaton<S>, S extends Transition<S
 	public void setMagnification(double mag) {
 		// TODO: Resize automata & notes, may actually want separate slider for
 		// automaton. Issue with changing magnification and points.
-		// transform.setToScale(mag * 2, mag * 2);
+//		transform.setToScale(mag * 2, mag * 2);
 		super.setMagnification(mag);
+		myDrawer.getVertexDrawer().changeRadius(mag);
+		myDrawer.magnifyLabel(mag);
+		myDrawer.getVertexDrawer().changeFontSize(mag);
 		repaint();
 	}
 
@@ -328,6 +330,7 @@ public class AutomatonEditorPanel<T extends Automaton<S>, S extends Transition<S
 	 * its location to the given point.
 	 */
 	public State createState(Point2D point) {
+
 		StateSet states = myAutomaton.getStates();
 		State vertex = states.createAndAddState();
 		myGraph.moveVertex(vertex, new Point2DAdv(point));

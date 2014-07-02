@@ -1,6 +1,7 @@
 package view.graph;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -17,6 +18,7 @@ import util.JFLAPConstants;
 public class VertexDrawer<T>{
 
 	private int myRadius;
+	private Font myFont;
 	private Color myColor;
 	private ColoredStroke myOutlineStroke;
 
@@ -27,6 +29,11 @@ public class VertexDrawer<T>{
 		setInnerColor(JFLAPPreferences.getStateColor());
 		setBorderColor(Color.black);
 		setBorderWidth(1);
+		setFont(JFLAPConstants.DEFAULT_FONT);
+	}
+	
+	private void setFont(Font f) {
+		myFont = f;
 	}
 
 	private void setBorderWidth(int i) {
@@ -75,6 +82,23 @@ public class VertexDrawer<T>{
 
 	public double getVertexRadius() {
 		return myRadius;
+	}
+	
+	/**
+	 * Change the radius of the vertex. 
+	 * Called when the magnification scrolling bar is changed. 
+	 * @param mag
+	 */
+	public void changeRadius(double mag) {
+		myRadius = (int) (JFLAPConstants.STATE_RADIUS * 2 * mag);
+	}
+	
+	public void changeFontSize(double mag) {
+			myFont = myFont.deriveFont((float) (JFLAPConstants.DEFAULT_FONT.getSize2D() * 2 * mag));
+	}
+	
+	public Font getFont() {
+		return myFont;
 	}
 
 }
