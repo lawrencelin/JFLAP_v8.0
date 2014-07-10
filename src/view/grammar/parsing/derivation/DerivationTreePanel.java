@@ -33,7 +33,7 @@ import util.JFLAPConstants;
 
 public class DerivationTreePanel extends DerivationPanel {
 
-//	private static final String LAMBDA = "\u03BB";
+	//	private static final String LAMBDA = "\u03BB";
 	private static final Color INNER = new Color(100, 200, 120),
 			LEAF = new Color(255, 255, 100),
 			BRACKET = new Color(150, 150, 255), // purple
@@ -105,7 +105,7 @@ public class DerivationTreePanel extends DerivationPanel {
 	}
 
 	/**
-	 * Parse the derivation to initialize tree structure
+	 * Parse the derivation to initialize tree structure (for restricted grammar)
 	 */
 	private void initTree() {
 		List<UnrestrictedTreeNode> curNodes = new ArrayList<UnrestrictedTreeNode>();
@@ -164,9 +164,16 @@ public class DerivationTreePanel extends DerivationPanel {
 
 		// Reset level counter
 		// if we want to step back:
-//				myLevel = myAnswer.getSubstitutionArray().length;
+		//				myLevel = myAnswer.getSubstitutionArray().length;
 		// if we want normal stepping forward:
 		myLevel = 0;
+	}
+
+	@Override
+	public void reset() {
+		myLevel = 0;
+		group = 0;
+		production = -1;
 	}
 
 	/* (non-Javadoc)
@@ -184,15 +191,14 @@ public class DerivationTreePanel extends DerivationPanel {
 				next();
 			} else {
 				myLevel++;
-				//				stepBack();
 			}
 		}
 	}
 
-	public void stepBack() {
-		if (myLevel > 0) {
-			myLevel--;
-		}
+	@Override
+	public void undo() {
+		myLevel-=2; // -2 to revert to previous step
+		this.repaint();
 	}
 
 	@Override
@@ -942,7 +948,7 @@ public class DerivationTreePanel extends DerivationPanel {
 			g.translate(-p.getX(), -p.getY());
 		}
 	}
-	
+
 	@Override
 	protected void additionalMagnificationAction(double mag) {
 		nodeDrawer.magnify(mag);

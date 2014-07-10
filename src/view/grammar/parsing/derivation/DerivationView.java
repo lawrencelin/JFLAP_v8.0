@@ -37,5 +37,27 @@ public class DerivationView extends MagnifiableTabbedPane{
 				((DerivationPanel)c).setDerivation(d);
 		}
 	}
+	
+	/**
+	 * Perform the reset action. 
+	 */
+	public void reset() {
+		for (Component c : this.getComponents()) {
+			if (c instanceof DerivationPanel) {
+				((DerivationPanel)c).reset();
+			}
+		}
+	}
+	
+	/**
+	 * Perform the undo action. 
+	 */
+	public void undo() {
+		for (Component c : this.getComponents()) {
+			if (c instanceof DerivationPanel) {
+				((DerivationPanel)c).undo();
+			}
+		}
+	}
 
 }

@@ -45,8 +45,24 @@ public class DerivationController extends SteppableAlgorithm {
 	public boolean reset() throws AlgorithmException {
 		step = 0;
 		myView.setDerivation(myDerivation.getSubDerivation(step));
+		myView.reset();
 		distributeChange(new AdvancedChangeEvent(this, RESET, myDerivation));
+		myView.repaint();
 		return true;
+	}
+	
+	@Override
+	public boolean canUndo() {
+		// Undo button can be pressed if it's not the initial step
+		return step > 0;
+	}
+	
+	public void undo() throws AlgorithmException {
+		step--;
+		myView.setDerivation(myDerivation.getSubDerivation(step));
+		myView.undo();
+		distributeChange(new AdvancedChangeEvent(this, step, myDerivation));
+//		myView.repaint();
 	}
 	
 	private class NextDerivationStep implements AlgorithmStep{
@@ -72,6 +88,16 @@ public class DerivationController extends SteppableAlgorithm {
 			return myDerivation.getSubDerivation(step).equals(myDerivation);
 		}
 		
+	}
+	
+	/* (non-Javadoc)
+	 * @see model.algorithms.steppable.SteppableAlgorithm#isRunning()
+	 * Always return true so that the parse tree can be redone even if the derivation
+	 * is complete, in case people want to watch it again. 
+	 */
+	@Override
+	public boolean isRunning(){
+		return true;
 	}
 	
 	private boolean nextDerivation(){
