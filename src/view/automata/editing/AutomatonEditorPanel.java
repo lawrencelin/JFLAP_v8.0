@@ -154,9 +154,14 @@ public class AutomatonEditorPanel<T extends Automaton<S>, S extends Transition<S
 		// automaton. Issue with changing magnification and points.
 //		transform.setToScale(mag * 2, mag * 2);
 		super.setMagnification(mag);
+		// Resize node
 		myDrawer.getVertexDrawer().changeRadius(mag);
+		// Resize edge label
 		myDrawer.magnifyLabel(mag);
+		// Resize node label
 		myDrawer.getVertexDrawer().changeFontSize(mag);
+		// Resize edge and arrow
+		myDrawer.magnifyEdge(mag);
 		repaint();
 	}
 
