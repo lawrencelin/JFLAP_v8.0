@@ -47,11 +47,11 @@ public class RegularExpressionToNFAConversion extends ConversionAlgorithm<Regula
 	private void initDeExpressionifiers() {
 		myDeExpressionifiers = new ArrayList<DeExpressionifier>();
 		OperatorAlphabet ops = getRE().getOperators();
+//		System.out.println(ops.toString());
 		myDeExpressionifiers.add(new KleeneStarDeX(ops));
 		myDeExpressionifiers.add(new GroupingDeX(ops));
 		myDeExpressionifiers.add(new UnionDeX(ops));
 		myDeExpressionifiers.add(new ConcatDeX(ops));
-
 	}
 
 	@Override
@@ -93,6 +93,7 @@ public class RegularExpressionToNFAConversion extends ConversionAlgorithm<Regula
 	private void updateExpressionTransitions() {
 		myExpressionTransitions = new ArrayList<FSATransition>();
 		for (FSATransition t: getGTG().getTransitions()){
+//			System.out.println(t);
 			if (isExpressionTransition(t))
 				myExpressionTransitions.add(t);
 		}
@@ -104,7 +105,17 @@ public class RegularExpressionToNFAConversion extends ConversionAlgorithm<Regula
 
 	private boolean isExpressionTransition(FSATransition t) {
 		SymbolString input = new SymbolString(t.getInput());
-		return input.containsAny(this.getRE().getOperators().toArray(new Symbol[0]));
+		
+		// This deals with the cases where operators are present
+		if (input.containsAny(this.getRE().getOperators().toArray(new Symbol[0]))) {
+			return true;
+		}
+		// This deals with the concatenation cases
+		if (input.size() > 1) {
+			return true;
+		}
+		return false;
+//		return input.containsAny(this.getRE().getOperators().toArray(new Symbol[0]));
 	}
 
 	
@@ -133,6 +144,7 @@ public class RegularExpressionToNFAConversion extends ConversionAlgorithm<Regula
 		for (DeExpressionifier dex: myDeExpressionifiers){
 			if (dex.isApplicable(t)){
 				myRemainingLambaTransitions.addAll(dex.adjustTransitionSet(t, getGTG()));
+//				System.out.println("hey");
 				updateExpressionTransitions();
 				return;
 			}
@@ -157,6 +169,9 @@ public class RegularExpressionToNFAConversion extends ConversionAlgorithm<Regula
 	}
 
 	public List<FSATransition> getExpressionTransitions() {
+		for (FSATransition t : myExpressionTransitions) {
+			System.out.println(t);
+		}
 		return myExpressionTransitions;
 	}
 	
@@ -165,7 +180,7 @@ public class RegularExpressionToNFAConversion extends ConversionAlgorithm<Regula
 //		if (this.isRunning())
 //			throw new AlgorithmException("You may not retrieve the NFA until all " +
 //					"transitions in the GTG have been de-expressionified.");
-		
+
 		return getGTG().createNFAFromGTG();
 	}
 
@@ -187,7 +202,6 @@ public class RegularExpressionToNFAConversion extends ConversionAlgorithm<Regula
 
 		@Override
 		public boolean execute() throws AlgorithmException {
-
 			FSATransition t = getExpressionTransitions().get(0);
 			beginDeExpressionify(t);
 			
