@@ -31,7 +31,6 @@ public class GeneralizedTransitionGraph extends FiniteStateAcceptor {
 		FSATransition trans = new FSATransition(start, 
 				end, 
 				myRegEx.getExpression());
-//		System.out.println(trans);
 		this.getTransitions().add(trans);
 	}
 

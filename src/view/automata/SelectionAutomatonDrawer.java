@@ -90,6 +90,9 @@ AutomatonDrawer<T> {
 			super.drawLabel(g2d, t, graph, center);
 	}
 	
+	/** Set magnifications for the edges. 
+	 * @param mag
+	 */
 	public void magnifyEdge(double mag) {
 		GraphHelper.setMagnification(mag);
 	}

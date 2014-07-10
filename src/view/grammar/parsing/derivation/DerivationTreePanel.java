@@ -91,28 +91,17 @@ public class DerivationTreePanel extends DerivationPanel {
 		checkGrammarType();
 		// initialize restricted tree
 		initTree();
-
-		//		 test
-		//				levelSeparation = 4;
-		//				siblingSeparation = 4;
-		//				subtreeSeparation = 2;
-		//				positionTree(root);
-		//		printPosition(root);
-		//		printChildren(root);
-		//		printChildren((UnrestrictedTreeNode)root.getChildAt(1).getChildAt(1));
 	}
 
 	/**
 	 * Determine if the grammar is unrestricted grammar. 
-	 * @return
 	 */
-	private boolean checkGrammarType() {
+	private void checkGrammarType() {
 		for (Production p : myAnswer.getProductionArray()) {
 			if (p.getLHS().length > 1) {
 				isUnrestrictedGrammar = true;
 			}
 		}
-		return isUnrestrictedGrammar;
 	}
 
 	/**
@@ -346,10 +335,6 @@ public class DerivationTreePanel extends DerivationPanel {
 	//	}
 
 	private void bridgeTo(List<UnrestrictedTreeNode> prev, int level) {
-		//		for (UnrestrictedTreeNode t : prev) {
-		//			System.out.print(t.getText());
-		//		}
-		//		System.out.println();
 		if (level > myAnswer.length())
 			return;
 		List<UnrestrictedTreeNode> current = new ArrayList<UnrestrictedTreeNode>();
@@ -730,6 +715,11 @@ public class DerivationTreePanel extends DerivationPanel {
 		prevList = new LinkedList<UnrestrictedTreeNode>();
 	}
 
+	/**
+	 * Return the previous node at the specified level. 
+	 * @param level
+	 * @return
+	 */
 	private UnrestrictedTreeNode getPrevNodeAtLevel(int level) {
 		if (level > prevList.size()-1) {
 			return null;
@@ -737,6 +727,11 @@ public class DerivationTreePanel extends DerivationPanel {
 		return prevList.get(level);
 	}
 
+	/**
+	 * Set the previous node at the specified level. 
+	 * @param level
+	 * @param node
+	 */
 	private void setPrevNodeAtLevel(int level, UnrestrictedTreeNode node) {
 		if (level > prevList.size()-1) {
 			prevList.add(node);

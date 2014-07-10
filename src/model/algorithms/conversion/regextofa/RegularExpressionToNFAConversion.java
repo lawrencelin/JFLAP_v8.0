@@ -47,7 +47,6 @@ public class RegularExpressionToNFAConversion extends ConversionAlgorithm<Regula
 	private void initDeExpressionifiers() {
 		myDeExpressionifiers = new ArrayList<DeExpressionifier>();
 		OperatorAlphabet ops = getRE().getOperators();
-//		System.out.println(ops.toString());
 		myDeExpressionifiers.add(new KleeneStarDeX(ops));
 		myDeExpressionifiers.add(new GroupingDeX(ops));
 		myDeExpressionifiers.add(new UnionDeX(ops));
@@ -93,7 +92,6 @@ public class RegularExpressionToNFAConversion extends ConversionAlgorithm<Regula
 	private void updateExpressionTransitions() {
 		myExpressionTransitions = new ArrayList<FSATransition>();
 		for (FSATransition t: getGTG().getTransitions()){
-//			System.out.println(t);
 			if (isExpressionTransition(t))
 				myExpressionTransitions.add(t);
 		}
@@ -144,7 +142,6 @@ public class RegularExpressionToNFAConversion extends ConversionAlgorithm<Regula
 		for (DeExpressionifier dex: myDeExpressionifiers){
 			if (dex.isApplicable(t)){
 				myRemainingLambaTransitions.addAll(dex.adjustTransitionSet(t, getGTG()));
-//				System.out.println("hey");
 				updateExpressionTransitions();
 				return;
 			}
@@ -169,9 +166,6 @@ public class RegularExpressionToNFAConversion extends ConversionAlgorithm<Regula
 	}
 
 	public List<FSATransition> getExpressionTransitions() {
-		for (FSATransition t : myExpressionTransitions) {
-			System.out.println(t);
-		}
 		return myExpressionTransitions;
 	}
 	
