@@ -157,6 +157,5 @@ public class RGtoFSAConverter extends GrammarToAutomatonConverter<FiniteStateAcc
 	public GrammarType[] getValidTypes() {
 		return new GrammarType[]{GrammarType.RIGHT_LINEAR};
 	}
-
 	
 }

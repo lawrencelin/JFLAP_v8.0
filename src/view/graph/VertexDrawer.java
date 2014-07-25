@@ -64,7 +64,12 @@ public class VertexDrawer<T>{
 		fillShape(g2, r);
 		myOutlineStroke.apply((Graphics2D) g2);
 		drawShape(g2, r);
+//		drawVertexLabel(x, y, obj, g);
 
+	}
+	
+	private void drawVertexLabel(double x, double y, T obj, Graphics g) {
+		g.drawString(obj.toString(), (int)x, (int)y);
 	}
 	
 	public void fillShape(Graphics g, Rectangle r){

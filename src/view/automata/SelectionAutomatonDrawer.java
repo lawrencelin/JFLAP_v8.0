@@ -38,13 +38,19 @@ AutomatonDrawer<T> {
 	private Set<Note> mySelectedNotes;
 	private Font font = JFLAPConstants.DEFAULT_FONT;
 	private double magnification;
+	private boolean isVDG;
 
 	public SelectionAutomatonDrawer(StateDrawer vDraw) {
 		super(vDraw);
+		isVDG = false;
 		mySelectedStates = new TreeSet<State>();
 		mySelectedEdges = new HashSet<State[]>();
 		mySelectedTrans = new TreeSet<T>();
 		mySelectedNotes = new HashSet<Note>();
+	}
+	
+	public void setVDG() {
+		isVDG = true;
 	}
 
 	@Override
@@ -78,6 +84,7 @@ AutomatonDrawer<T> {
 	public void drawLabel(Graphics2D g2d, T t, TransitionGraph<T> graph,
 			Point2D center) {
 		g2d.setFont(font);
+		if (isVDG) return;
 		if (isSelected(t)) {
 			Color oldColor = g2d.getColor();
 			g2d.setColor(JFLAPPreferences.getSelectedTransitionColor());

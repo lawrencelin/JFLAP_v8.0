@@ -106,7 +106,6 @@ public class LambdaController {
 		ProductionTableModel model = (ProductionTableModel) pane.getTable()
 				.getModel();
 		Production p = model.getOrderedProductions()[row];
-
 		Set<Production> ps = remover.getProductionsToAddForRemoval(p);
 		if (ps == null || ps.isEmpty())
 			return;

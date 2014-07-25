@@ -22,7 +22,7 @@ public class CNFTransformAction extends AbstractAction {
 	public CNFTransformAction(GrammarView v) {
 		super("Transform Grammar");
 		myView = v;
-		this.setEnabled(false);
+//		this.setEnabled(false);
 	}
 
 	@Override

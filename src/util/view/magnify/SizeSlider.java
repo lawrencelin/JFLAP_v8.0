@@ -63,8 +63,13 @@ public class SizeSlider extends JSlider{
             public void stateChanged(ChangeEvent e) {
                 JSlider source = (JSlider)e.getSource();
                 double frac = source.getValue()/(double)MAX;
-                for (Magnifiable m: myTargets)
+//                System.out.println(myTargets.size());
+//                int i = 0;
+                for (Magnifiable m: myTargets) {
+//                	System.out.println(++i);
                 	m.setMagnification(frac);
+                }
+                	
             }
       }
 

@@ -7,6 +7,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import view.grammar.transform.UnitRemovalPanel;
+
 import debug.JFLAPDebug;
 
 import errors.BooleanWrapper;
@@ -25,10 +27,17 @@ import model.symbols.SymbolString;
 public class UnitProductionRemover extends ProductionIdentifyAlgorithm {
 
 	private ProductionSet myNonUnitProductions;
-	private ConstructDependencyGraphStep myDependencyGraphStep;
+	//	private ConstructDependencyGraphStep myDependencyGraphStep;
+	private UnitRemovalPanel myPanel;
+	private Grammar myGrammar;
 
 	public UnitProductionRemover(Grammar g) {
 		super(g);
+		myGrammar = g;
+	}
+
+	public void setPanel(UnitRemovalPanel p) {
+		myPanel = p;
 	}
 
 	@Override
@@ -39,20 +48,26 @@ public class UnitProductionRemover extends ProductionIdentifyAlgorithm {
 
 	@Override
 	public AlgorithmStep[] initializeAllSteps() {
+//				AlgorithmStep[] steps = super.initializeAllSteps();
+//				myDependencyGraphStep = new ConstructDependencyGraphStep();
+//				return new AlgorithmStep[]{steps[0],
+//							myDependencyGraphStep,
+//							steps[1]};
+//		return new AlgorithmStep[]{ new DependencyGraphStep()};
 		AlgorithmStep[] steps = super.initializeAllSteps();
-		myDependencyGraphStep = new ConstructDependencyGraphStep();
 		return new AlgorithmStep[]{steps[0],
-					myDependencyGraphStep,
-					steps[1]};
+				new DependencyGraphStep(),
+				steps[1]};
 	}
-	
+
+
+
 	@Override
 	public boolean reset() throws AlgorithmException {
 		myNonUnitProductions = getNonUnitProductions();
 		return super.reset();
 	}
-	
-	
+
 	private ProductionSet getNonUnitProductions() {
 		ProductionSet nonUnit = new ProductionSet();
 
@@ -71,13 +86,14 @@ public class UnitProductionRemover extends ProductionIdentifyAlgorithm {
 	@Override
 	public Set<Production> getProductionsToAddForRemoval(Production p) {
 		Set<Production> toAdd = new TreeSet<Production>();
+
 		Variable lhsVar = (Variable) p.getLHS()[0];
 		Variable rhsVar = (Variable) p.getRHS()[0];
-		
+
 		if (lhsVar.equals(rhsVar))
 			return toAdd;
-		
-		DependencyGraph graph = myDependencyGraphStep.getAlgorithm().getDependencyGraph();
+
+		DependencyGraph graph = myPanel.getDependencyGraph();
 
 		Variable[] dep = graph.getAllDependencies(lhsVar);
 		for(Variable v: dep){
@@ -85,9 +101,10 @@ public class UnitProductionRemover extends ProductionIdentifyAlgorithm {
 				toAdd.add(new Production(lhsVar, prod.getRHS()));
 			}
 		}
+		System.out.println(toAdd.toString());
 		return toAdd;
 	}
-	
+
 	@Override
 	public BooleanWrapper performRemove(Production p) {
 		BooleanWrapper bw = super.performRemove(p);
@@ -95,14 +112,14 @@ public class UnitProductionRemover extends ProductionIdentifyAlgorithm {
 			myNonUnitProductions.addAll(getAddsRemaining());
 		return bw;
 	}
-	
-	
-	
+
+
+
 	private boolean isUnitProduction(Production p) {
 		Symbol[] rhs = p.getRHS();
 		return rhs.length == 1 && Grammar.isVariable(rhs[0]);
 	}
-	
+
 	private class ConstructDependencyGraphStep extends AlgorithmExecutingStep<ConstructDependencyGraph>{
 
 		@Override
@@ -131,6 +148,55 @@ public class UnitProductionRemover extends ProductionIdentifyAlgorithm {
 	@Override
 	public String getIdentifyStepName() {
 		return "Identify all unit production";
+	}
+
+	private class DependencyGraphStep implements AlgorithmStep {
+
+		@Override
+		public String getDescriptionName() {
+			return "Dependency Graph Step";
+		}
+
+		@Override
+		public String getDescription() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public boolean execute() throws AlgorithmException {
+			myPanel.completeDependencyGraph();
+			return true;
+		}
+
+		@Override
+		public boolean isComplete() {
+			return myPanel.getNumberDependenciesLeft() == 0;
+		}
+	}
+
+	private class CompleteTableStep implements AlgorithmStep {
+
+		@Override
+		public String getDescriptionName() {
+			return "Unit Removal Table Step";
+		}
+
+		@Override
+		public String getDescription() {
+			return null;
+		}
+
+		@Override
+		public boolean execute() throws AlgorithmException {
+			return false;
+		}
+
+		@Override
+		public boolean isComplete() {
+			return getNumAddsRemaining() == 0 && getNumRemovesRemaining() == 0;
+		}
+		
 	}
 
 }

@@ -188,6 +188,11 @@ public abstract class ProductionIdentifyAlgorithm extends
 
 	public abstract boolean isOfTargetForm(Production p);
 
+	/**
+	 * Productions that need to be added to complete the process when a specific production is removed. 
+	 * @param p
+	 * @return
+	 */
 	public abstract Set<Production> getProductionsToAddForRemoval(Production p);
 
 	public abstract String getIdentifyStepName();

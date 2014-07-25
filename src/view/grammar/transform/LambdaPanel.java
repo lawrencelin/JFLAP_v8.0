@@ -233,9 +233,10 @@ public class LambdaPanel extends GrammarTransformPanel {
 				int r = event.getFirstRow();
 				if (event.getType() != TableModelEvent.UPDATE)
 					return;
-
+//				System.out.println("here");
 				if (editingColumn[0] == true && editingColumn[1] == true) {
 					Production p = model.getOrderedProductions()[r];
+//					System.out.println(p.toString());
 					if (p == null)
 						return;
 					BooleanWrapper bw = myAlg.performAdd(p);

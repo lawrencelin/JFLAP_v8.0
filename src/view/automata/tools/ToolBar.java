@@ -60,6 +60,10 @@ public class ToolBar extends JToolBar implements ActionListener {
 		myActiveTool = source.getTool();
 		this.broadcastToolChange();
 	}
+	
+	public void setActiveTool(int i) {
+		setActiveTool(myButtons.get(i));
+	}
 
 	private void broadcastToolChange() {
 		for (ToolListener tcl : myListeners)
@@ -74,6 +78,10 @@ public class ToolBar extends JToolBar implements ActionListener {
 	public void addToolListener(ToolListener tcl) {
 		myListeners.add(tcl);
 		tcl.toolActivated(myActiveTool);
+	}
+	
+	public void disableTool(int i) {
+		myButtons.get(i).setEnabled(false);
 	}
 
 }

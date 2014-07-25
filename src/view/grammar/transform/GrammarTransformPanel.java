@@ -48,7 +48,7 @@ public abstract class GrammarTransformPanel extends MagnifiablePanel {
 		MagnifiableSplitPane split = new MagnifiableSplitPane(JSplitPane.HORIZONTAL_SPLIT, lScroll, panel);
 		split.setDividerLocation(0.4);
 		split.setResizeWeight(0.4);
-		
+
 		SizeSlider slide = new SizeSlider(myProdTable, panel);
 		slide.distributeMagnification();
 		

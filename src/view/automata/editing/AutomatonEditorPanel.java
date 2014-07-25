@@ -93,7 +93,6 @@ public class AutomatonEditorPanel<T extends Automaton<S>, S extends Transition<S
 	public AutomatonEditorPanel(T m, UndoKeeper keeper, boolean editable) {
 		super(keeper, editable);
 		setLayout(null); // Needed to deal with Notes and Tables
-
 		myAutomaton = m;
 		myGraph = new TransitionGraph<S>(m);
 		myGraph.addListener(this);
@@ -108,6 +107,10 @@ public class AutomatonEditorPanel<T extends Automaton<S>, S extends Transition<S
 		ActionMap aMap = getActionMap();
 		iMap.put(KeyStroke.getKeyStroke((char) KeyEvent.VK_DELETE), DELETE);
 		aMap.put(DELETE, new DeleteAction());
+	}
+	
+	public void setVDG( ) {
+		myDrawer.setVDG();
 	}
 
 	@Override
