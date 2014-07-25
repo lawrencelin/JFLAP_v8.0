@@ -129,7 +129,7 @@ public class AboutBox extends JWindow implements JFLAPConstants{
 		try {
 //			IMAGE = Toolkit.getDefaultToolkit().getImage(JFLAPConstants.RESOURCE_ROOT + "/MEDIA/about.png");
 			IMAGE = Toolkit.getDefaultToolkit().getImage(
-					OBJECT.getClass().getResource("/MEDIA/about.png"));
+					OBJECT.getClass().getResource("/MEDIA/About_2014.png"));
 		} catch (NullPointerException e) {
 
 		}
