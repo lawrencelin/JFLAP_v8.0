@@ -49,7 +49,7 @@ public class GraphDrawer<T> implements JFLAPConstants {
 	}
 
 	public void drawLabel(T from, T to, Graph<T> obj, Graphics g) {
-		
+		// by default: do nothing
 	}
 
 	public void drawEdge(T from, T to, Graph<T> obj, Graphics g) {

@@ -20,4 +20,11 @@ public class DerivationPanel extends MagnifiablePanel {
 		return myDerivation;
 	}
 	
+	public void reset() {
+		// do nothing
+	}
+	
+	public void undo() {
+		// do nothing
+	}
 }

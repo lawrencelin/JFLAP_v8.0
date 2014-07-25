@@ -18,6 +18,7 @@
 package oldnewstuff.view.tree;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
@@ -33,6 +34,17 @@ import universe.preferences.JFLAPPreferences;
  */
 
 public class DefaultNodeDrawer implements NodeDrawer {
+	
+	public float nodeRadius;
+	public Shape NODE_SHAPE;
+	
+	public DefaultNodeDrawer() {
+		nodeRadius = NODE_RADIUS;
+		NODE_SHAPE = new Ellipse2D.Float(-nodeRadius,
+				-nodeRadius, nodeRadius * 2.0f, nodeRadius * 2.0f);
+
+	}
+	
 	/**
 	 * This draws a node. The fill color is the color of the graphics object
 	 * before this method was called.
@@ -57,6 +69,7 @@ public class DefaultNodeDrawer implements NodeDrawer {
 		// Draw the label for the node.
 		int dx = ((int) bounds.getWidth()) >> 1;
 		int dy = ((int) -bounds.getY()) >> 1;
+		g.setFont(g.getFont().deriveFont(Font.PLAIN, nodeRadius));
 		g.drawString(s, -dx, dy);
 		// Restore the color.
 		g.setColor(c);
@@ -64,12 +77,12 @@ public class DefaultNodeDrawer implements NodeDrawer {
 	
 	public void draw(Graphics2D g, TreeNode node, boolean dummy)
 	{
-		g.fill(new Ellipse2D.Float(-NODE_RADIUS,
-				-NODE_RADIUS, NODE_RADIUS * 4.0f, NODE_RADIUS * 2.0f));
+		g.fill(new Ellipse2D.Float(-nodeRadius,
+				-nodeRadius, nodeRadius * 4.0f, nodeRadius * 2.0f));
 		Color c = g.getColor();
 		g.setColor(Color.black);
-		g.draw(new Ellipse2D.Float(-NODE_RADIUS,
-				-NODE_RADIUS, NODE_RADIUS * 4.0f, NODE_RADIUS * 2.0f));
+		g.draw(new Ellipse2D.Float(-nodeRadius,
+				-nodeRadius, nodeRadius * 4.0f, nodeRadius * 2.0f));
 
 		String s = node.toString();
 		if (s == null)
@@ -80,6 +93,7 @@ public class DefaultNodeDrawer implements NodeDrawer {
 		// Draw the label for the node.
 		int dx = ((int) bounds.getWidth()) >> 2;
 		int dy = ((int) -bounds.getY()) >> 1;
+		g.setFont(g.getFont().deriveFont(Font.PLAIN, nodeRadius));
 		g.drawString(s, -dx, dy);
 		// Restore the color.
 		g.setColor(c);
@@ -134,17 +148,24 @@ public class DefaultNodeDrawer implements NodeDrawer {
 	 * @see #draw
 	 */
 	public boolean onNode(TreeNode node, double x, double y) {
-		return Math.sqrt(x * x + y * y) <= NODE_RADIUS;
+		return Math.sqrt(x * x + y * y) <= nodeRadius;
+	}
+	
+	/**
+	 * Increase/decrease the size of the nodes
+	 * @param mag
+	 */
+	public void magnify(double mag) {
+		nodeRadius = (float) (2.5 * mag * NODE_RADIUS);
+		NODE_SHAPE = new Ellipse2D.Float(-nodeRadius,
+				-nodeRadius, nodeRadius * 2.0f, nodeRadius * 2.0f);
 	}
 
-	/** The shape of a node. */
+	/** The radius of a node. */
 	public static final float NODE_RADIUS = 13.0f;
-
-	public static final Shape NODE_SHAPE = new Ellipse2D.Float(-NODE_RADIUS,
-			-NODE_RADIUS, NODE_RADIUS * 2.0f, NODE_RADIUS * 2.0f);
-
+	
 	/** A constant node size. */
-	public static final Rectangle2D NODE_SIZE = new Rectangle(
-			(int) NODE_RADIUS, (int) NODE_RADIUS, (int) (NODE_RADIUS * 2.0f),
-			(int) (NODE_RADIUS * 2.0f));
+	public Rectangle2D NODE_SIZE = new Rectangle(
+			(int) nodeRadius, (int) nodeRadius, (int) (nodeRadius * 2.0f),
+			(int) (nodeRadius * 2.0f));
 }

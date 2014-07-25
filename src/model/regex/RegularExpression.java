@@ -47,7 +47,7 @@ public class RegularExpression extends FormalDefinition {
 		myOperatorAlphabet = new OperatorAlphabet();
 		myGrammar = new RegularExpressionGrammar(alph, myOperatorAlphabet);
 	}
-	
+
 	public RegularExpression(){
 		this(new InputAlphabet());
 	}
@@ -104,20 +104,20 @@ public class RegularExpression extends FormalDefinition {
 		return myExpression.setTo(s);
 
 	}
-	
+
 	@Override
 	public void componentChanged(AdvancedChangeEvent event) {
 		super.componentChanged(event);
-//		if(event.getSource() instanceof InputAlphabet){
-//			if(event.getType() == ITEM_MODIFIED){
-//				Symbol from = (Symbol) event.getArg(0);
-//				Symbol to = (Symbol) event.getArg(1);
-//				myExpression.applySymbolMod(from.getString(), to.getString());
-//			}
-//		}
+		//		if(event.getSource() instanceof InputAlphabet){
+		//			if(event.getType() == ITEM_MODIFIED){
+		//				Symbol from = (Symbol) event.getArg(0);
+		//				Symbol to = (Symbol) event.getArg(1);
+		//				myExpression.applySymbolMod(from.getString(), to.getString());
+		//			}
+		//		}
 		distributeChange(event);
 	}
-	
+
 	@Override
 	public Alphabet[] getParsingAlphabets() {
 		return UtilFunctions.combine(super.getAlphabets(),myOperatorAlphabet);
@@ -165,17 +165,17 @@ public class RegularExpression extends FormalDefinition {
 				"Operators are poorly formatted.");
 		BooleanWrapper badLambda = new BooleanWrapper(false,
 				"Lambda character must not cat with anything else.");
-		
+
 		Symbol c = exp.getFirst();
 		if (c.equals(star))
 			return poorFormat;
 		if (c.equals(empty) && exp.size() > 1 && !exp.get(1).equals(union))
 			return badLambda;
-		
+
 		Symbol p = c;
 		for (int i = 1; i < exp.size(); i++) {
 			c = exp.get(i);
-			
+
 			if (c.equals(union) && i == exp.size()-1){
 				return poorFormat;
 			}
@@ -293,15 +293,37 @@ public class RegularExpression extends FormalDefinition {
 			return input;
 		int n = 0;
 		int i = 0;
+		boolean parenthesePresent = false;
 		for (; i < input.size(); i++){
 			Symbol s = input.get(i);
-			if (ops.getOpenGroup().equals(s))
+			if (ops.getOpenGroup().equals(s)) {
 				n++;
-			else if(ops.getCloseGroup().equals(s)) 
-				n--;
+				parenthesePresent = true;
+			}
 
-			if (n == 0)
-				break;
+			else if(ops.getCloseGroup().equals(s)) {
+				n--;
+				if (n == 0) {
+					break;
+				}
+			}
+			if (ops.getUnionOperator().equals(s)) {
+				if (n == 0) {
+					return input.subList(0, i);
+				}
+			}
+		}
+		//			if (n == 0)
+		//				break;
+		//		int j = 0;
+		//		for (j = i; j < input.size(); j++) {
+		//			if (input.get(j).equals(ops.getUnionOperator())){
+		//				return input.subList(0, j);
+		//			}
+		//		}
+		if (!parenthesePresent || 
+				((i == input.size()-1) || ((i == input.size()-2) && input.get(input.size()-1).equals(ops.getKleeneStar()))) && !input.get(0).equals(ops.getOpenGroup())) {
+			i = 0;
 		}
 
 		if (i < input.size()-1 && 
@@ -314,7 +336,7 @@ public class RegularExpression extends FormalDefinition {
 	@Override
 	public RegularExpression copy() {
 		return new RegularExpression(getInputAlphabet().copy(), 
-									myExpression.copy());
+				myExpression.copy());
 	}
 
 

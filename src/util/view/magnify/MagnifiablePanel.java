@@ -30,9 +30,13 @@ public class MagnifiablePanel extends JPanel implements Magnifiable {
 			if (c instanceof Magnifiable)
 				((Magnifiable) c).setMagnification(mag);
 		}
+		additionalMagnificationAction(mag);
 		this.repaint();
 	}
-
+	
+	protected void additionalMagnificationAction(double mag) {
+		// by default, do nothing
+	}
 	
 	
 }

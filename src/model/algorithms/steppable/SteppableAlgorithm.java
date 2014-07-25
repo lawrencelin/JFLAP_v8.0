@@ -73,8 +73,16 @@ public abstract class SteppableAlgorithm extends ChangingObject implements Descr
 		return this.getCurrentStep() != null;
 	}
 	
+	public boolean canUndo() {
+		return false;
+	}
+	
 	public boolean isRunning(){
 		return this.canStep();
+	}
+	
+	public void undo() throws AlgorithmException {
+		// do nothing
 	}
 	
 	public abstract boolean reset() throws AlgorithmException;

@@ -1,6 +1,7 @@
 package view.automata;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.Point2D;
@@ -32,7 +33,7 @@ public class StateDrawer extends VertexDrawer<State> {
 		int dy = ((int) g.getFontMetrics().getAscent()) >> 1;
 		
 		myTextStroke.apply((Graphics2D) g);
-		
+		g.setFont(getFont());
 		g.drawString(obj.getName(),(int) x - dx, (int) (y + dy));
 	}
 	
@@ -64,5 +65,4 @@ public class StateDrawer extends VertexDrawer<State> {
 		g.drawOval((int) x, (int) y,
 				radius, radius);
 	}
-	
 }

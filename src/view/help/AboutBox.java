@@ -40,7 +40,7 @@ import java.awt.event.*;
  * @author Thomas Finley
  */
 
-public class AboutBox extends JWindow {
+public class AboutBox extends JWindow implements JFLAPConstants{
 	/**
 	 * Instantiates a new <TT>AboutBox</TT>.
 	 * 
@@ -86,7 +86,7 @@ public class AboutBox extends JWindow {
 	 * Displays this about box, and plays the clip.
 	 */
 	public void displayBox() {
-		JFLAPDebug.print("You should change this image...");
+//		JFLAPDebug.print("You should change this image...");
 		boolean toPlay = !isVisible();
 		pack();
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -122,12 +122,14 @@ public class AboutBox extends JWindow {
 	private static Image IMAGE = null;
 
 	/** The version string. */
-	public static final String VERSION = "6.4";
+//	public static final String VERSION = "6.4";
 
 
 	static {
 		try {
-			IMAGE = Toolkit.getDefaultToolkit().getImage(JFLAPConstants.RESOURCE_ROOT + "/MEDIA/about.png");
+//			IMAGE = Toolkit.getDefaultToolkit().getImage(JFLAPConstants.RESOURCE_ROOT + "/MEDIA/about.png");
+			IMAGE = Toolkit.getDefaultToolkit().getImage(
+					OBJECT.getClass().getResource("/MEDIA/about.png"));
 		} catch (NullPointerException e) {
 
 		}

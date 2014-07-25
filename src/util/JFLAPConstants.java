@@ -27,7 +27,7 @@ public interface JFLAPConstants {
 						PLUS = "+", BAR = "|",
 						UNION = "\u222A", LOGICAL_OR = "\u2228";
 	public static final Icon PRODUCTION_ARROW = new ArrowIcon(20, 8);
-	public static final String VERSION = "8.0";
+	public static final String VERSION = "8.0 (Beta)";
 	public static final Border DEF_PANEL_BORDER = BorderFactory
 			.createLineBorder(Color.BLACK, 3);
 	public static final Color DEFAULT_SWING_BG = UIManager

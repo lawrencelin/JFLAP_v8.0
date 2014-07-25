@@ -2,6 +2,7 @@ package view.automata;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.Point2D;
@@ -26,15 +27,17 @@ import util.view.GraphHelper;
  * Automaton Drawer that allows for and keeps track of selection of States,
  * Arrows, and Transitions and draws them accordingly.
  * 
- * @author Ian McMahon
+ * @author Ian McMahon, Lawrence Lin
  */
 public class SelectionAutomatonDrawer<T extends Transition<T>> extends
-		AutomatonDrawer<T> {
+AutomatonDrawer<T> {
 
 	private Set<State> mySelectedStates;
 	private Set<State[]> mySelectedEdges;
 	private Set<T> mySelectedTrans;
 	private Set<Note> mySelectedNotes;
+	private Font font = JFLAPConstants.DEFAULT_FONT;
+	private double magnification;
 
 	public SelectionAutomatonDrawer(StateDrawer vDraw) {
 		super(vDraw);
@@ -62,26 +65,44 @@ public class SelectionAutomatonDrawer<T extends Transition<T>> extends
 		Color current = g.getColor();
 		g.setColor(JFLAPPreferences.getTransitionColor());
 
-		if (isSelected(new State[] { from, to }))
+		if (isSelected(new State[] { from, to })) {
 			drawSelectedEdge(from, to, obj, g);
-		else
+		}
+		else {
 			super.drawEdge(from, to, obj, g);
+		}
 		g.setColor(current);
 	}
 
 	@Override
 	public void drawLabel(Graphics2D g2d, T t, TransitionGraph<T> graph,
 			Point2D center) {
+		g2d.setFont(font);
 		if (isSelected(t)) {
 			Color oldColor = g2d.getColor();
 			g2d.setColor(JFLAPPreferences.getSelectedTransitionColor());
-			
+
 			LabelBounds bounds = GraphHelper.getLabelBounds(graph, t, g2d);
 			bounds.fill(g2d);
-			
+
 			g2d.setColor(oldColor);
 		} else
 			super.drawLabel(g2d, t, graph, center);
+	}
+	
+	/** Set magnifications for the edges. 
+	 * @param mag
+	 */
+	public void magnifyEdge(double mag) {
+		GraphHelper.setMagnification(mag);
+	}
+
+	/**
+	 * Change the size of the labels.
+	 * @param mag
+	 */
+	public void magnifyLabel(double mag) {
+		font = font.deriveFont((float) (JFLAPConstants.DEFAULT_FONT.getSize2D() * 2 * mag));
 	}
 
 	/** Selects or deselects the given object based on <CODE>select</CODE> */
@@ -89,20 +110,20 @@ public class SelectionAutomatonDrawer<T extends Transition<T>> extends
 		if (o instanceof State)
 			return select ? mySelectedStates.add((State) o) : mySelectedStates
 					.remove((State) o);
-		else if (o instanceof State[]){
-			State[] edge = (State[]) o;
-			if(select) return mySelectedEdges.add(edge);
-			
-			for(State[] e : mySelectedEdges)
-				if(edge[0].equals(e[0]) && edge[1].equals(e[1]))
-					return mySelectedEdges.remove(e);
-		}
-		else if (o instanceof Transition)
-			return select ? mySelectedTrans.add((T) o) : mySelectedTrans
-					.remove((T) o);
-			else if (o instanceof Note)
-				return select ? mySelectedNotes.add((Note) o) : mySelectedNotes.remove((Note) o);
-		return false;
+			else if (o instanceof State[]){
+				State[] edge = (State[]) o;
+				if(select) return mySelectedEdges.add(edge);
+
+				for(State[] e : mySelectedEdges)
+					if(edge[0].equals(e[0]) && edge[1].equals(e[1]))
+						return mySelectedEdges.remove(e);
+			}
+			else if (o instanceof Transition)
+				return select ? mySelectedTrans.add((T) o) : mySelectedTrans
+						.remove((T) o);
+				else if (o instanceof Note)
+					return select ? mySelectedNotes.add((Note) o) : mySelectedNotes.remove((Note) o);
+					return false;
 	}
 
 	/** Returns true if the given Object is selected. */
@@ -128,19 +149,19 @@ public class SelectionAutomatonDrawer<T extends Transition<T>> extends
 		mySelectedTrans.clear();
 		mySelectedNotes.clear();
 	}
-	
+
 	public Set<State> getSelectedStates(){
 		return mySelectedStates;
 	}
-	
+
 	public Set<T> getSelectedTransitions(){
 		return mySelectedTrans;
 	}
-	
+
 	public Set<State[]> getSelectedEdges(){
 		return mySelectedEdges;
 	}
-	
+
 	public Set<Note> getSelectedNotes() {
 		return mySelectedNotes;
 	}
@@ -153,6 +174,12 @@ public class SelectionAutomatonDrawer<T extends Transition<T>> extends
 		vDraw.setInnerColor(JFLAPPreferences.getStateColor());
 	}
 
+	/** Draw out the edge when it is selected.
+	 * @param from
+	 * @param to
+	 * @param obj
+	 * @param g
+	 */
 	private void drawSelectedEdge(State from, State to, Graph<State> obj,
 			Graphics g) {
 		Graphics2D g2 = (Graphics2D) g.create();
@@ -163,11 +190,11 @@ public class SelectionAutomatonDrawer<T extends Transition<T>> extends
 		g2.dispose();
 	}
 
-//	/** Draws the control point p. */
-//	private void drawPoint(Graphics g, Point2D p) {
-//		g.drawOval((int) p.getX() - JFLAPConstants.CONTROL_POINT_RADIUS,
-//				(int) p.getY() - JFLAPConstants.CONTROL_POINT_RADIUS,
-//				JFLAPConstants.CONTROL_POINT_RADIUS * 2,
-//				JFLAPConstants.CONTROL_POINT_RADIUS * 2);
-//	}
+	//	/** Draws the control point p. */
+	//	private void drawPoint(Graphics g, Point2D p) {
+	//		g.drawOval((int) p.getX() - JFLAPConstants.CONTROL_POINT_RADIUS,
+	//				(int) p.getY() - JFLAPConstants.CONTROL_POINT_RADIUS,
+	//				JFLAPConstants.CONTROL_POINT_RADIUS * 2,
+	//				JFLAPConstants.CONTROL_POINT_RADIUS * 2);
+	//	}
 }

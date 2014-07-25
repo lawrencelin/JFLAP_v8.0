@@ -33,7 +33,7 @@ public abstract class SingleInputTransition<T extends SingleInputTransition<T>> 
 	 * the string of symbols that allows some input
 	 * to move along this transition
 	 */
-	private SymbolString myInput;
+	public SymbolString myInput;
 
 
 	/**

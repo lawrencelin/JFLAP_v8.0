@@ -43,6 +43,30 @@ public class UnrestrictedTreeNode extends DefaultMutableTreeNode {
 	public int lowest = 0;
 	
 	/**
+	 * X coordinate
+	 */
+	public double xCoord;
+	
+	/**
+	 * Y coordinate
+	 */
+	public double yCoord;
+	
+	/**
+	 * Preliminary x coordinate
+	 */
+	public double prelimX = 0;
+	
+	/**
+	 * Modifier value
+	 */
+	public double modifier = 0;
+	
+	public UnrestrictedTreeNode prevNode;
+	public UnrestrictedTreeNode nextLevel;
+	public UnrestrictedTreeNode leftNeighbor;
+	
+	/**
 	 * Creates a new unrestricted tree node.
 	 * 
 	 * @param text

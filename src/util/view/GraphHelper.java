@@ -26,7 +26,11 @@ import view.automata.AutomatonDrawer;
 import view.automata.LabelBounds;
 
 public class GraphHelper implements JFLAPConstants{
-
+	private static double magnification = 0.5;
+	
+	public static void setMagnification(double mag) {
+		magnification = mag;
+	}
 	/**
 	 * Reforms the points so they are enclosed within a certain frame.
 	 * 
@@ -182,7 +186,7 @@ public class GraphHelper implements JFLAPConstants{
 		Point2D pTo = obj.pointForVertex(to);
 		Point2D ctrl = obj.getControlPt(from,to);
 		
-		double rad = STATE_RADIUS;
+		double rad = STATE_RADIUS * 2 * magnification;
 		double theta1 = GeometryHelper.calculateAngle(pFrom, pTo),
 				theta2=GeometryHelper.calculateAngle(pTo, pFrom);
 		if (from.equals(to)){
@@ -194,7 +198,7 @@ public class GraphHelper implements JFLAPConstants{
 		Point2D edgeTo = GeometryHelper.pointOnCircle(pTo,rad,theta2);
 		
 		double arrowheadLen = 0;
-		if (obj.isDirected()) arrowheadLen=ARROW_LENGTH;
+		if (obj.isDirected()) arrowheadLen=ARROW_LENGTH * 2 * magnification;
 		CurvedArrow curve = new CurvedArrow(arrowheadLen, ARROW_ANGLE);
 		curve.setCurve(edgeFrom, ctrl, edgeTo);
 		return curve;

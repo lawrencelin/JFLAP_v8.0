@@ -29,13 +29,17 @@ import oldnewstuff.view.tree.DefaultTreeDrawer;
 import oldnewstuff.view.tree.TreeDrawer;
 import oldnewstuff.view.tree.UnrestrictedTreeNode;
 import universe.preferences.JFLAPPreferences;
+import util.JFLAPConstants;
 
 public class DerivationTreePanel extends DerivationPanel {
 
+	//	private static final String LAMBDA = "\u03BB";
 	private static final Color INNER = new Color(100, 200, 120),
 			LEAF = new Color(255, 255, 100),
 			BRACKET = new Color(150, 150, 255), // purple
 			BRACKET_OUT = BRACKET.darker().darker();
+	private static final int MAX_DEPTH = Integer.MAX_VALUE;
+	private static final int CENTER_NODE_Y = (int) (2*DefaultNodeDrawer.NODE_RADIUS);
 
 	private boolean amInverted;
 	private TreeDrawer treeDrawer;
@@ -51,6 +55,15 @@ public class DerivationTreePanel extends DerivationPanel {
 	private Map<UnrestrictedTreeNode, Point2D> nodeToPoint;
 
 	private UnrestrictedTreeNode root;
+	private double xTopAdjustment;
+	private double yTopAdjustment;
+	private List<UnrestrictedTreeNode> prevList;
+	private double levelSeparation; // Minimal distance between levels of nodes
+	private double siblingSeparation; // Minimal distance between sibling nodes
+	private double subtreeSeparation; // Minimal distance between subtrees
+	private Map<Integer, List<UnrestrictedTreeNode>> nodesToDraw;
+	private double finalAdjustment;
+	private boolean isUnrestrictedGrammar;
 
 	private Derivation myAnswer;
 
@@ -63,6 +76,7 @@ public class DerivationTreePanel extends DerivationPanel {
 		nodeToParentGroup = new HashMap<UnrestrictedTreeNode, List<UnrestrictedTreeNode>>();
 		nodeToParentWeights = new HashMap<UnrestrictedTreeNode, Double>();
 		amInverted = inverted;
+		isUnrestrictedGrammar = false;
 	}
 
 	public DerivationTreePanel(TreeModel tree, boolean inverted) {
@@ -74,11 +88,97 @@ public class DerivationTreePanel extends DerivationPanel {
 		myAnswer = d;
 		setAnswer(d);
 		called = false;
+		checkGrammarType();
+		// initialize restricted tree
+		initTree();
+	}
+
+	/**
+	 * Determine if the grammar is unrestricted grammar. 
+	 */
+	private void checkGrammarType() {
+		for (Production p : myAnswer.getProductionArray()) {
+			if (p.getLHS().length > 1) {
+				isUnrestrictedGrammar = true;
+			}
+		}
+	}
+
+	/**
+	 * Parse the derivation to initialize tree structure (for restricted grammar)
+	 */
+	private void initTree() {
+		List<UnrestrictedTreeNode> curNodes = new ArrayList<UnrestrictedTreeNode>();
+		List<UnrestrictedTreeNode> childrenList = new ArrayList<UnrestrictedTreeNode>();
+		List<UnrestrictedTreeNode> temp = new ArrayList<UnrestrictedTreeNode>();
+		nodesToDraw = new HashMap<Integer, List<UnrestrictedTreeNode>>();
+		for (int i = 0; i < myAnswer.getProductionArray().length; i++) {
+			Production currentProd = myAnswer.getProduction(i);
+			int index = myAnswer.getSubstitution(i);
+			// since it is restricted grammar, lhs should only have one symbol. right?
+			Symbol lhs = currentProd.getLHS()[0];
+			Symbol[] rhs = currentProd.getRHS();
+			// Lamdba correction:
+			if (rhs.length == 0) {
+				rhs = new Symbol[1];
+				rhs[0] = new Symbol(JFLAPConstants.LAMBDA);
+			}
+			if (curNodes.isEmpty()) {
+				root = new UnrestrictedTreeNode(lhs);
+				curNodes.add(root);
+				List<UnrestrictedTreeNode> tempList = new ArrayList<UnrestrictedTreeNode>();
+				tempList.add(root);
+				nodesToDraw.put(myLevel, tempList);
+				myLevel++;
+			} 
+			UnrestrictedTreeNode parent = curNodes.get(index);
+			for (Symbol s : rhs) {
+				UnrestrictedTreeNode node = new UnrestrictedTreeNode(s);
+				parent.add(node);
+				childrenList.add(node);
+			}
+			List<UnrestrictedTreeNode> tempList = new ArrayList<UnrestrictedTreeNode>();
+			tempList.addAll(nodesToDraw.get(myLevel-1));
+			tempList.addAll(childrenList);
+			nodesToDraw.put(myLevel, tempList);
+			for (int j = 0; j < index; j++) {
+				temp.add(curNodes.get(j));
+			}
+			// update current list of nodes
+			temp.addAll(childrenList);
+			temp.addAll(curNodes.subList(index+1, curNodes.size()));
+			curNodes.clear();
+			curNodes.addAll(temp);
+			for (int j = 0; j < curNodes.size(); j++) {
+				// Remove lambda nodes from the list so as not to mess up with the derivation
+				// Failure to do so will result in an incorrect parse tree
+				if (curNodes.get(j).getText().toString().equals(JFLAPConstants.LAMBDA)) {
+					curNodes.remove(j);
+					j--;
+				}
+			}
+			childrenList.clear();
+			temp.clear();
+			myLevel++;
+		}
+
+		// Reset level counter
+		// if we want to step back:
+		//				myLevel = myAnswer.getSubstitutionArray().length;
+		// if we want normal stepping forward:
+		myLevel = 0;
+	}
+
+	@Override
+	public void reset() {
+		myLevel = 0;
+		group = 0;
+		production = -1;
 	}
 
 	/* (non-Javadoc)
 	 * @see view.grammar.parsing.derivation.DerivationPanel#setDerivation(model.algorithms.testinput.parse.Derivation)
-	 * Called when the "next" button is clicked.
+	 * Called when the "step" button is clicked.
 	 */
 	@Override
 	public void setDerivation(Derivation d) {
@@ -87,8 +187,18 @@ public class DerivationTreePanel extends DerivationPanel {
 			called = true;
 		else
 		{
-			next();
+			if (isUnrestrictedGrammar) {
+				next();
+			} else {
+				myLevel++;
+			}
 		}
+	}
+
+	@Override
+	public void undo() {
+		myLevel-=2; // -2 to revert to previous step
+		this.repaint();
 	}
 
 	@Override
@@ -100,9 +210,34 @@ public class DerivationTreePanel extends DerivationPanel {
 		Dimension d = getSize();
 		g.fillRect(0, 0, d.width, d.height);
 		g.setColor(Color.black);
-		if (top != null)
-			paintTree(g);
+		realWidth = d.width;
+		realHeight = d.height;
+		if (top != null) {
+			if (isUnrestrictedGrammar) {
+				paintUnrestrictedTree(g);
+			} else {
+				paintRestrictedTree(g);
+			}
+		}
 		g.dispose();
+	}
+
+	private void paintRestrictedTree(Graphics2D g) {
+		levelSeparation = (realHeight-CENTER_NODE_Y)/root.getDepth() - DefaultNodeDrawer.NODE_RADIUS;
+		siblingSeparation = realWidth / root.getLeafCount();
+		subtreeSeparation = 2*nodeDrawer.nodeRadius;
+
+		//		root = buildTestTree();
+		positionTree(root);
+		if (finalAdjustment != 0) {
+			if (finalAdjustment < 0) {
+				finalAdjustment-=nodeDrawer.nodeRadius;
+			} else {
+				finalAdjustment+=nodeDrawer.nodeRadius;
+			}
+		}
+		adjust(root);
+		paintTree(g, root, new Point2D.Double(root.xCoord, root.yCoord));
 	}
 
 	public TreeNode nodeAtPoint(Point2D point) {
@@ -206,10 +341,6 @@ public class DerivationTreePanel extends DerivationPanel {
 	//	}
 
 	private void bridgeTo(List<UnrestrictedTreeNode> prev, int level) {
-		//		for (UnrestrictedTreeNode t : prev) {
-		//			System.out.print(t.getText());
-		//		}
-		//		System.out.println();
 		if (level > myAnswer.length())
 			return;
 		List<UnrestrictedTreeNode> current = new ArrayList<UnrestrictedTreeNode>();
@@ -350,7 +481,7 @@ public class DerivationTreePanel extends DerivationPanel {
 		}
 	}
 
-	private void paintTree(Graphics2D g) {
+	private void paintUnrestrictedTree(Graphics2D g) {
 		Dimension d = getSize();
 		realWidth = d.width;
 		realHeight = d.height;
@@ -403,7 +534,7 @@ public class DerivationTreePanel extends DerivationPanel {
 								Point2D beta = (Point2D) nodeToPoint.get(parent
 										.get(parent.size() - 1));
 								g.setColor(BRACKET);
-								int radius = (int) DefaultNodeDrawer.NODE_RADIUS;
+								int radius = (int) nodeDrawer.nodeRadius;
 								int ax = (int) (alpha.getX() - radius - 3);
 								int ay = (int) (alpha.getY() - radius - 3);
 								g.fillRoundRect(ax, ay, (int) (beta.getX()
@@ -445,7 +576,7 @@ public class DerivationTreePanel extends DerivationPanel {
 								Point2D beta = nodeToPoint.get(parent
 										.get(parent.size() - 1));
 								g.setColor(BRACKET);
-								int radius = (int) DefaultNodeDrawer.NODE_RADIUS;
+								int radius = (int) nodeDrawer.nodeRadius;
 								int ax = (int) (alpha.getX() - radius - 3);
 								int ay = (int) (alpha.getY() - radius - 3);
 								g.fillRoundRect(ax, ay, (int) (beta.getX()
@@ -550,5 +681,276 @@ public class DerivationTreePanel extends DerivationPanel {
 			return true; // Everything starts at beginning.
 		return ends(level - 1, group);
 	}
-	
+
+	/**
+	 * This method, by calling other methods, determines the coordinates
+	 * of each node. 
+	 * 
+	 * @param n
+	 * @return
+	 */
+	private boolean positionTree(UnrestrictedTreeNode n) {
+		finalAdjustment = 0;
+
+		if (n!=null) {
+			// pre-set coordinates of the root: top center
+			n.xCoord = realWidth / 2;
+			//			int child = n.getChildCount();
+			//			int i = child / 2;
+			//			int leftPortion = 0;
+			//			for (int j = 0; j < i; j++) {
+			//				leftPortion+= ((UnrestrictedTreeNode) n.getChildAt(j)).getLeafCount();
+			//			}
+			//			n.xCoord = realWidth * leftPortion / n.getLeafCount();
+
+			n.yCoord = CENTER_NODE_Y;
+			initPrevNodeList();
+			firstWalk(n, 0);
+			xTopAdjustment = n.xCoord - n.prelimX; 
+			yTopAdjustment = n.yCoord; 
+			return secondWalk(n, 0 , 0);
+		} 
+		return true;
+	}
+
+	/**
+	 * Initialize the list which contains a list of previous nodes
+	 * at each level. 
+	 */
+	private void initPrevNodeList() {
+		prevList = new LinkedList<UnrestrictedTreeNode>();
+	}
+
+	/**
+	 * Return the previous node at the specified level. 
+	 * @param level
+	 * @return
+	 */
+	private UnrestrictedTreeNode getPrevNodeAtLevel(int level) {
+		if (level > prevList.size()-1) {
+			return null;
+		}
+		return prevList.get(level);
+	}
+
+	/**
+	 * Set the previous node at the specified level. 
+	 * @param level
+	 * @param node
+	 */
+	private void setPrevNodeAtLevel(int level, UnrestrictedTreeNode node) {
+		if (level > prevList.size()-1) {
+			prevList.add(node);
+			return;
+		}
+		prevList.set(level, node);
+	}
+
+	/**
+	 * Post-order traversal to determine the preliminary x coordinate and the 
+	 * modifier value of each node. The values determined will be used in 
+	 * the second walk to finalize position of the nodes. 
+	 * 
+	 * @param node
+	 * @param level
+	 */
+	private void firstWalk(UnrestrictedTreeNode node, int level) {
+		node.leftNeighbor = getPrevNodeAtLevel(level);
+		setPrevNodeAtLevel(level, node);
+		node.modifier = 0;
+		if (node.isLeaf() || level == MAX_DEPTH) {
+			if (node.getPreviousSibling() != null) {
+				node.prelimX = ((UnrestrictedTreeNode) node.getPreviousSibling()).prelimX +
+						siblingSeparation + nodeDrawer.nodeRadius;
+			} else {
+				node.prelimX = 0;
+			}
+		} else {
+			UnrestrictedTreeNode leftMost = (UnrestrictedTreeNode) node.getFirstChild();
+			UnrestrictedTreeNode rightMost = leftMost;
+			firstWalk(leftMost, level+1);
+			while (rightMost.getNextSibling() != null) {
+				rightMost = (UnrestrictedTreeNode) rightMost.getNextSibling();
+				firstWalk(rightMost, level+1);
+			}
+			double midPoint = (leftMost.prelimX + rightMost.prelimX) /2;
+			if (node.getPreviousSibling() != null) {
+				node.prelimX = ((UnrestrictedTreeNode) node.getPreviousSibling()).prelimX +
+						siblingSeparation + nodeDrawer.nodeRadius;
+				node.modifier = node.prelimX - midPoint;
+				apportion(node, level);
+			} else {
+				node.prelimX = midPoint;
+			}
+		}
+	}
+
+	/**
+	 * Pre-order traversal to finalize the coordinates of the nodes. 
+	 * @param node
+	 * @param level
+	 * @param modSum
+	 * @return
+	 */
+	private boolean secondWalk(UnrestrictedTreeNode node, int level, double modSum) {
+		boolean result = true;
+		if (level <= MAX_DEPTH) {
+			double xTemp = xTopAdjustment + node.prelimX + modSum;
+			double yTemp = yTopAdjustment + (level * levelSeparation);
+			node.xCoord = xTemp;
+			node.yCoord = yTemp;
+			if (!node.isLeaf()) {
+				result = secondWalk((UnrestrictedTreeNode)node.getFirstChild(), 
+						level+1, 
+						modSum+node.modifier);
+			}
+			if (result == true && node.getNextSibling()!=null) {
+				result = secondWalk((UnrestrictedTreeNode)node.getNextSibling(), level, modSum);
+			}
+			//			} else {
+			if (xTemp < 0) {
+				finalAdjustment = Math.min(finalAdjustment, xTemp);
+			} else if (xTemp > realWidth) {
+				finalAdjustment = Math.max(finalAdjustment, xTemp);
+			}
+			//				result = false;
+		}
+		//		}
+		return result;
+	}
+
+	/**
+	 * Adjust the position of the subtree.
+	 * 
+	 * @param node
+	 * @param level
+	 */
+	private void apportion(UnrestrictedTreeNode node, int level) {
+		UnrestrictedTreeNode leftMost = (UnrestrictedTreeNode) node.getFirstChild();
+		UnrestrictedTreeNode neighbor = leftMost.leftNeighbor;
+		int compareDepth = 1;
+		int depthToStop = MAX_DEPTH - level;
+		while (leftMost != null && 
+				neighbor != null && 
+				compareDepth <= depthToStop) {
+
+			double leftModSum = 0;
+			double rightModSum = 0;
+			UnrestrictedTreeNode ancestorLeftMost = leftMost;
+			UnrestrictedTreeNode ancestorNeighbor = neighbor;
+			for (int i = 0; i < compareDepth; i++) {
+				ancestorLeftMost = (UnrestrictedTreeNode) ancestorLeftMost.getParent();
+				ancestorNeighbor = (UnrestrictedTreeNode) ancestorNeighbor.getParent();
+				rightModSum += ancestorLeftMost.modifier;
+				leftModSum += ancestorNeighbor.modifier;
+			}
+
+			double moveDistance = (neighbor.prelimX + leftModSum + subtreeSeparation +
+					nodeDrawer.nodeRadius) - (leftMost.prelimX + rightModSum);
+
+			if (moveDistance > 0) {
+				UnrestrictedTreeNode temp = node;
+				int leftSiblings = 0;
+				while (temp != null && !temp.equals(ancestorNeighbor)) {
+					leftSiblings++;
+					temp = (UnrestrictedTreeNode) temp.getPreviousSibling();
+				}
+				if (temp != null) {
+					double portion = moveDistance / leftSiblings;
+					temp = node;
+					while (!temp.equals(ancestorNeighbor)) {
+						temp.prelimX+=moveDistance;
+						temp.modifier+=moveDistance;
+						moveDistance-=portion;
+						temp = (UnrestrictedTreeNode) temp.getPreviousSibling();
+					}
+				} else {
+					return;
+				}
+			}
+
+			compareDepth++;
+			if (leftMost.isLeaf()) {
+				leftMost = getLeftMost(node, 0 ,compareDepth);
+			} else {
+				leftMost = (UnrestrictedTreeNode) leftMost.getFirstChild();
+			}
+			if (leftMost != null) {
+				neighbor = leftMost.leftNeighbor;
+			}
+		}
+	}
+
+	/**
+	 * Return the left-most descendant of a node at a given depth, implemented
+	 * using a post-order traversal. 
+	 * The level here is not the absolute level; it means the level below the node
+	 * whose descendant is to be found. 
+	 * @param node
+	 * @param level
+	 * @param depth
+	 * @return
+	 */
+	private UnrestrictedTreeNode getLeftMost(UnrestrictedTreeNode node, int level, int depth) {
+		if (level>=depth) return node;
+		if (node.isLeaf()) return null;
+		UnrestrictedTreeNode rightMost = (UnrestrictedTreeNode) node.getFirstChild();
+		UnrestrictedTreeNode leftMost = getLeftMost(rightMost, level+1, depth);
+		while (leftMost == null && rightMost.getNextSibling() != null) {
+			rightMost = (UnrestrictedTreeNode) rightMost.getNextSibling();
+			leftMost = getLeftMost(rightMost, level+1, depth);
+		}
+		return leftMost;
+	}
+
+	/**
+	 * Perform a final adjustment of the position of the nodes
+	 * @param n
+	 */
+	private void adjust(UnrestrictedTreeNode n) {
+		if (n == null) {
+			return;
+		}
+		n.xCoord -= finalAdjustment;
+		for (int i = 0; i < n.getChildCount(); i++) {
+			adjust((UnrestrictedTreeNode) n.getChildAt(i));
+		}
+	}
+
+	/**
+	 * Draw out the tree on canvas. 
+	 * @param g
+	 * @param node
+	 * @param p
+	 */
+	private void paintTree (Graphics2D g, UnrestrictedTreeNode node, Point2D p) {
+		if (node == null) {
+			return;
+		}
+		for (int i = 0; i < node.getChildCount(); i++) {
+			UnrestrictedTreeNode temp = (UnrestrictedTreeNode) node.getChildAt(i);
+			// draw line if the children should be drawn
+			if (nodesToDraw.get(myLevel).contains(temp)) {
+				g.setColor(Color.black);
+				g.drawLine((int)node.xCoord, (int)node.yCoord, (int)temp.xCoord, (int)temp.yCoord);
+			}
+			paintTree(g, temp, new Point2D.Double(temp.xCoord, temp.yCoord));
+		}
+		if (node.getChildCount() > 0) {
+			g.setColor(INNER);
+		} else {
+			g.setColor(LEAF);
+		}
+		// draw out the node
+		if (nodesToDraw.get(myLevel).contains(node)) {
+			g.translate(p.getX(), p.getY());
+			nodeDrawer.draw(g, node);
+			g.translate(-p.getX(), -p.getY());
+		}
+	}
+
+	@Override
+	protected void additionalMagnificationAction(double mag) {
+		nodeDrawer.magnify(mag);
+	}
 }

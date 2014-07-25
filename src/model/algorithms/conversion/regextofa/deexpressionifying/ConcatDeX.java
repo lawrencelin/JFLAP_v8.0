@@ -47,5 +47,6 @@ public class ConcatDeX extends FourStateDeX{
 	@Override
 	protected boolean isApplicable(SymbolString first, SymbolString rest) {
 		return rest.size() > 0 && !rest.startsWith(myUnionOperator);
+//		return rest.size() > 0;
 	}
 }

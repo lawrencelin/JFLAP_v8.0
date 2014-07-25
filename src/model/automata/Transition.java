@@ -6,9 +6,9 @@ public abstract class Transition<T extends Transition<T>> extends
 		AutomatonFunction<T> {
 
 	/** The states this transition goes between. */
-	private State myFrom;
+	public State myFrom;
 	/** The states this transition goes between. */
-	private State myTo;
+	public State myTo;
 
 	public Transition(State from, State to) {
 		myFrom = from;
