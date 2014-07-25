@@ -42,7 +42,7 @@ public class AboutAction extends AbstractAction {
 	 */
 	public AboutAction() {
 		super("About...");
-		this.setEnabled(false);
+		this.setEnabled(true);
 	}
 
 	/**
