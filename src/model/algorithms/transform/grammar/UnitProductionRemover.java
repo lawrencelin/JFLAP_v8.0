@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import view.grammar.productions.ProductionTableModel;
 import view.grammar.transform.UnitRemovalPanel;
 
 import debug.JFLAPDebug;
@@ -53,11 +54,10 @@ public class UnitProductionRemover extends ProductionIdentifyAlgorithm {
 //				return new AlgorithmStep[]{steps[0],
 //							myDependencyGraphStep,
 //							steps[1]};
-//		return new AlgorithmStep[]{ new DependencyGraphStep()};
-		AlgorithmStep[] steps = super.initializeAllSteps();
-		return new AlgorithmStep[]{steps[0],
-				new DependencyGraphStep(),
-				steps[1]};
+		return new AlgorithmStep[]{ new DependencyGraphStep(), new CompleteTableStep()};
+//		AlgorithmStep[] steps = super.initializeAllSteps();
+//		return new AlgorithmStep[]{new DependencyGraphStep(),
+//				steps[1]};
 	}
 
 
@@ -101,7 +101,7 @@ public class UnitProductionRemover extends ProductionIdentifyAlgorithm {
 				toAdd.add(new Production(lhsVar, prod.getRHS()));
 			}
 		}
-		System.out.println(toAdd.toString());
+//		System.out.println(toAdd.toString());
 		return toAdd;
 	}
 
@@ -149,6 +149,15 @@ public class UnitProductionRemover extends ProductionIdentifyAlgorithm {
 	public String getIdentifyStepName() {
 		return "Identify all unit production";
 	}
+	
+	private void completeEditingTable() {
+		for (Production p : getAllRemovesLeft()) {
+			performRemove(p);
+			((ProductionTableModel) myPanel.getEditingTable().getModel())
+//			System.out.println(this.getTransformedGrammar().getProductionSet().remove(p));
+		
+	}
+	}
 
 	private class DependencyGraphStep implements AlgorithmStep {
 
@@ -166,6 +175,7 @@ public class UnitProductionRemover extends ProductionIdentifyAlgorithm {
 		@Override
 		public boolean execute() throws AlgorithmException {
 			myPanel.completeDependencyGraph();
+			System.out.println(getAllRemovesLeft().toString());
 			return true;
 		}
 
@@ -189,7 +199,8 @@ public class UnitProductionRemover extends ProductionIdentifyAlgorithm {
 
 		@Override
 		public boolean execute() throws AlgorithmException {
-			return false;
+			completeEditingTable();
+			return true;
 		}
 
 		@Override
