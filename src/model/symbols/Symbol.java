@@ -20,7 +20,7 @@ import model.regex.EmptySub;
 
 import util.Copyable;
 
-public class Symbol extends SetSubComponent<Symbol>{
+public class Symbol extends SetSubComponent<Symbol> {
 
 	private String myString;
 	

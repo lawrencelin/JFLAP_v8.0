@@ -2,6 +2,7 @@ package model.algorithms.testinput.parse.ll;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -37,14 +38,16 @@ public class LL1ParseTable {
 		myTable = new Set[myRows.length][myColumns.length];
 		for (int i = 0; i< myRows.length;i++){
 			for (int j = 0; j < myColumns.length; j++){
-				myTable[i][j] = new TreeSet<Symbol[]>();
+				myTable[i][j] = new HashSet<Symbol[]>(); //TreeSet -> HashSet
 			}
 		}
 		if (complete)
 			completeTable();
 	}
 	
-	
+	public FirstFollowTable getFFTable(){
+		return myFirstFollow;
+	}
 
 	public LL1ParseTable(Grammar g){
 		this (g, true);
@@ -88,14 +91,11 @@ public class LL1ParseTable {
 		int c = getColForTerm(t);
 		return setValue(symbols, r, c);
 	}
-	
 
 
 	private boolean setValue(Symbol[] rhs, int r, int c) {
 		return myTable[r][c].add(rhs);
 	}
-
-
 
 	private int getColForTerm(Terminal t) {
 		for(int i = 0; i < myColumns.length; i++){

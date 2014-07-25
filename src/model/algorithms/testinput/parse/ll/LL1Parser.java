@@ -22,6 +22,7 @@ public class LL1Parser extends StackUsingParser {
 	private SymbolString myStack;
 	private Derivation myDerivation;
 	private SymbolString mySymbolsToAdd;
+	private boolean FFTcompleted;
 
 	public LL1Parser(Grammar g) {
 		this(g, new LL1ParseTable(g));
@@ -30,6 +31,11 @@ public class LL1Parser extends StackUsingParser {
 	public LL1Parser(Grammar g, LL1ParseTable table) {
 		super(g);
 		myParseTable = table;
+		FFTcompleted = false;
+	}
+	
+	public LL1ParseTable getTable(){
+		return myParseTable;
 	}
 
 	@Override
@@ -138,6 +144,18 @@ public class LL1Parser extends StackUsingParser {
 	public boolean addSymbolToStack() {
 		myStack.addFirst(mySymbolsToAdd.pollLast());
 		return true;
+	}
+	
+	@Override
+	public AlgorithmStep step(){
+		if (!FFTcompleted)
+			//TODO figure out if null causes problems
+			return null;
+		return super.step();
+	}
+	
+	public boolean canStep(){
+		return !FFTcompleted;
 	}
 
 	private class AddSymbolToStackStep implements AlgorithmStep{
